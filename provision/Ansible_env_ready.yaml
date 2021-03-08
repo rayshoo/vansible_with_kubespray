@@ -1,0 +1,59 @@
+---
+- name: Setup for the Ansible's Environment
+  hosts: localhost
+  gather_facts: yes
+  tasks:
+    - name: Install vim-enhanced (RHEL/CentOS)
+      when: ansible_os_family == "RedHat"
+      #when: ansible_facts['distribution'] == "CentOS"
+      yum:
+        name: vim-enhanced
+        state: present
+
+    - name: Install git (RHEL/CentOS)
+      when: ansible_os_family == "RedHat"
+      #when: ansible_facts['distribution'] == "CentOS"
+      yum:
+        name: git
+        state: present
+
+    - name: Install vim-enhanced (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      #when: ansible_facts['distribution'] == "Ubuntu"
+      apt:
+        name: "vim"
+        state: present
+
+    - name: Install git (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      #when: ansible_facts['distribution'] == "Ubuntu"
+      apt:
+        name: "git"
+        state: present
+
+    - name: Download pathogen.vim
+      shell: "curl -fLo /home/vagrant/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
+    
+    - name: Git clone vim-ansible-yaml
+      git:
+        repo: 'https://github.com/chase/vim-ansible-yaml.git'
+        dest: /home/vagrant/.vim/bundle/vim-ansible-yaml
+
+    - name: Configure vimrc
+      lineinfile:
+        dest: /home/vagrant/.vimrc
+        line: "{{ item }}"
+      with_items:
+        - "set number"
+        - "execute pathogen#infect()"
+        - "syntax on"
+        - "autocmd FileType yaml setlocal ai ts=2 sw=2 et"
+
+    - name: Configure Bashrc
+      lineinfile:
+        dest: /home/vagrant/.bashrc
+        line: "{{ item }}"
+      with_items:
+        - "alias vi='vim'"
+        - "alias ans='ansible'"
+        - "alias anp='ansible-playbook"
