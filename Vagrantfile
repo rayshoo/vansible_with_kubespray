@@ -19,9 +19,9 @@ Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox"
   config.vm.synced_folder ".", "/vagrant", disabled: true
   config.env.enable # enable the plugin
-  os_image = (ENV['os_image'] || "ubuntu16").to_sym
+  os_image = (ENV['os_image'] || "ubuntu20").to_sym
   master = (ENV['master'] || 3).to_i
-  worker = (ENV['worker'] || 1).to_i
+  worker = (ENV['worker'] || 2).to_i
   
   network_address = ENV['network_address'] || "192.168.35."
   min_address = (ENV['initial_address'] || 10).to_i
@@ -35,7 +35,6 @@ Vagrant.configure("2") do |config|
     id   = (id <= 10) ? "0#{id}" : "#{id}"
 
     config.vm.define "#{name}#{id}" do |n|
-      # print "#{name}#{id}"
       n.vm.host_name = "#{name}#{id}"
       machine_address = min_address + private_count
       ip_addr = "#{network_address}#{machine_address}"
@@ -47,9 +46,13 @@ Vagrant.configure("2") do |config|
         vb.cpus = (machine <= master) ? 2 : 1
       end
       private_count += 1
-      n.vm.provision :shell, path: "./provision/bootstrap.sh", env: {"root_passwd" => root_passwd}
-      n.vm.provision "file", source: "./provision/Ansible_env_ready.yaml", destination: "Ansible_env_ready.yaml"
-      n.vm.provision "shell", inline: "ansible-playbook Ansible_env_ready.yaml"
     end
+  end
+
+  config.vm.define "m01" do |cfg|
+    cfg.vm.provision :shell, path: "provision/bootstrap.sh", env: {"root_passwd" => root_passwd}
+    cfg.vm.provision "file", source: "provision/Ansible_env_ready.yaml", destination: "Ansible_env_ready.yaml"
+    cfg.vm.provision "shell", inline: "ansible-playbook Ansible_env_ready.yaml"
+    cfg.vm.provision "shell", path: "provision/add_ssh_auth.sh", privileged: false
   end
 end

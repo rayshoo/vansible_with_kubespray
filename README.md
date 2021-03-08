@@ -119,5 +119,5 @@ $ vagrant plugin update
 ### 참고한 곳
 
 [노력 이기는 재능 없고 노력 외면하는 결과도 없다, asdf](https://m.blog.naver.com/PostView.nhn?blogId=sory1008&logNo=220759961657&proxyReferer=https:%2F%2Fwww.google.com%2F)  
-[YOUNG.K](https://rangken.github.io/blog/2015/vagrant-1/)
+[YOUNG.K](https://rangken.github.io/blog/2015/vagrant-1/)  
 [다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant)](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)
