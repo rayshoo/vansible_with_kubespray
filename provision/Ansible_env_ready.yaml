@@ -8,14 +8,22 @@
         dest=/etc/hosts
         content="
         192.168.33.10 m01
-        192.168.33.11 w01"
+        192.168.33.11 m02
+        192.168.33.12 m03
+        192.168.33.13 w01
+        192.168.33.14 w02"
 
     - name: Add "/etc/ansible/hosts"
       blockinfile: |
         dest=/etc/ansible/hosts
         content="
+        [master]
+        m01
+        m02
+        m03
         [worker]
-        w01"
+        w01
+        w02"
 
     - name: Install sshpass for Authentication (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
@@ -42,7 +50,7 @@
       apt:
         name: sshpass
         state: present
-        
+
     - name: Install vim-enhanced (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
       #when: ansible_facts['distribution'] == "Ubuntu"

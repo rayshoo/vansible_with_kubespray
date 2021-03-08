@@ -7,6 +7,9 @@ VirtualBox - ctrl+G(Preference) - Network - add network with name 'NatNetwork'
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
 $ vagrant up
+$ vagrant ssh m01
+$ ansible all -m ping -k
+SSH password: vagrant
 ```
 
 ## vagrant
