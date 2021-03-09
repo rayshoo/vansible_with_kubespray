@@ -1,4 +1,4 @@
-# Vagrant to Kubeadm
+# Vagrant to Kubernetes
 
 ## How to Use
 
