@@ -47,11 +47,15 @@ Vagrant.configure("2") do |config|
         set_vbox(vb, override, os_image)
         vb.cpus = (machine <= worker) ? 1 : 2
       end
-      if machine == (master + worker)
+      if machine < (master + worker)
+        n.vm.provision "shell", path: "provision/bash_ssh_conf.sh"
+      else
         n.vm.provision :shell, path: "provision/bootstrap.sh"
         n.vm.provision "file", source: "provision/Ansible_env_ready.yaml", destination: "Ansible_env_ready.yaml"
         n.vm.provision "shell", inline: "ansible-playbook Ansible_env_ready.yaml"
         n.vm.provision "shell", path: "provision/add_ssh_auth.sh", privileged: false
+        n.vm.provision "file", source: "provision/Ansible_ssh_conf.yaml", destination: "Ansible_ssh_conf.yaml"
+        n.vm.provision "shell", inline: "ansible-playbook Ansible_ssh_conf.yaml"
       end
       private_count += 1
     end
