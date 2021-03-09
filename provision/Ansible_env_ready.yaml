@@ -8,10 +8,11 @@
         dest=/etc/hosts
         content="
         192.168.33.10 m01
-        192.168.33.11 m02
-        192.168.33.12 m03
-        192.168.33.13 w01
-        192.168.33.14 w02"
+        #192.168.33.11 m02
+        #192.168.33.12 m03
+        #192.168.33.13 w01
+        192.168.33.11 w01
+        #192.168.33.14 w02"
 
     - name: Add "/etc/ansible/hosts"
       blockinfile: |
@@ -19,11 +20,11 @@
         content="
         [master]
         m01
-        m02
-        m03
+        # m02
+        # m03
         [worker]
         w01
-        w02"
+        # w02"
 
     - name: Install sshpass for Authentication (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
@@ -90,4 +91,4 @@
       with_items:
         - "alias vi='vim'"
         - "alias ans='ansible'"
-        - "alias anp='ansible-playbook"
+        - "alias anp='ansible-playbook'"

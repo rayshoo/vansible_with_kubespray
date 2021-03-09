@@ -24,8 +24,10 @@ Vagrant.configure("2") do |config|
   total_node = master + worker
   
   network_address = ENV['network_address'] || "192.168.35."
-  min_address = (ENV['initial_address'] || 10).to_i
-  max_address = min_address + master + worker - 1
+  min_address = (ENV['min_address'] || 10).to_i
+  max_address = min_address + total_node - 1
+  min_host_port = (ENV['min_host_port'] || 19210).to_i
+  max_host_port = min_host_port + total_node - 1
   private_count = 0
 
   (1..(master + worker)).each do |machine|
@@ -38,6 +40,7 @@ Vagrant.configure("2") do |config|
       machine_address = max_address - private_count
       ip_addr = "#{network_address}#{machine_address}"
       n.vm.network :private_network, ip: "#{ip_addr}", auto_config: true, virtualbox__intnet: "NatNetwork"
+      n.vm.network "forwarded_port", guest: 22, host: (max_host_port - private_count), auto_correct: false, id: "ssh"
       
       n.vm.provider :virtualbox do |vb, override|
         vb.name = "#{n.vm.hostname}"

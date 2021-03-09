@@ -67,6 +67,8 @@ $ vagrant suspend [name|id]
 // suspend 해제 (vagrant up 역시 가능)
 $ vagrant resume [name|id]
 
+// ssh-config 조회(network forwarded port 설정되있어야함)
+$ vagrant ssh-config
 ```
 
 Share
