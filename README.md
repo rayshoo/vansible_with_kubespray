@@ -2,12 +2,10 @@
 
 ## How to Use
 
-VirtualBox - ctrl+G(Preference) - Network - add network with name 'NatNetwork'
-
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
 $ vagrant up
-$ vagrant ssh m01
+$ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
 $ ansible all -m ping -k
 SSH password: vagrant
 ```

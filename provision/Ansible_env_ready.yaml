@@ -7,23 +7,23 @@
       blockinfile: |
         dest=/etc/hosts
         content="
-        192.168.33.10 m01
-        192.168.33.11 w01
-        192.168.33.12 w02
-        # 192.168.33.13 w01
-        # 192.168.33.14 w02"
+        192.168.55.50 m1
+        192.168.55.51 m2
+        192.168.55.52 w1
+        192.168.55.53 w2
+        # 192.168.55.54 w2"
 
     - name: Add "/etc/ansible/hosts"
       blockinfile: |
         dest=/etc/ansible/hosts
         content="
         [master]
-        m01
-        # m02
-        # m03
+        m1
+        m2
+        # m3
         [worker]
-        w01
-        w02"
+        w1
+        w2"
 
     - name: Install sshpass for Authentication (RHEL/CentOS)
       when: ansible_os_family == "RedHat"

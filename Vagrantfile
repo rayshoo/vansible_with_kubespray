@@ -22,6 +22,9 @@ Vagrant.configure("2") do |config|
   master = (ENV['master'] || 3).to_i
   worker = (ENV['worker'] || 2).to_i
   total_node = master + worker
+  master_node_name = ENV['master_node_name'] || "m"
+  worker_node_name = ENV['worker_node_name'] || 'w'
+  print worker_node_name
   
   network_address = ENV['network_address'] || "192.168.35."
   min_address = (ENV['min_address'] || 10).to_i
@@ -31,15 +34,14 @@ Vagrant.configure("2") do |config|
   private_count = 0
 
   (1..(master + worker)).each do |machine|
-    name = (machine <= worker) ? "w" : "m"
+    name = (machine <= worker) ? "#{worker_node_name}" : "#{master_node_name}"
     id   = (machine <= worker) ? (worker - machine + 1) : (total_node - machine + 1)
-    id   = (id <= 10) ? "0#{id}" : "#{id}"
 
     config.vm.define "#{name}#{id}" do |n|
       n.vm.host_name = "#{name}#{id}"
       machine_address = max_address - private_count
       ip_addr = "#{network_address}#{machine_address}"
-      n.vm.network :private_network, ip: "#{ip_addr}", auto_config: true, virtualbox__intnet: "NatNetwork"
+      n.vm.network "private_network", ip: "#{ip_addr}"
       n.vm.network "forwarded_port", guest: 22, host: (max_host_port - private_count), auto_correct: false, id: "ssh"
       
       n.vm.provider :virtualbox do |vb, override|
