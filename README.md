@@ -53,9 +53,6 @@ $ vagrant reload [name|id]
 // 프로비저닝 적용
 $ vagrant provision [vm-name]
 
-// 스냅샷
-$ vagrant snapshot
-
 // 삭제
 $ vagrant destroy
 $ vagrant destory --force
@@ -69,6 +66,18 @@ $ vagrant resume [name|id]
 
 // ssh-config 조회(network forwarded port 설정되있어야함)
 $ vagrant ssh-config
+
+// 스냅샷 조회
+$ vagrant snapshot list
+
+// 스냅샷 저장
+$ vagrant snapshot save [vm-name] [name]
+
+// 스냅샷 복원
+$ vagrant snapshot restore [vm-name] [name]
+
+// 스냅샷 삭제
+$ vagrant snapshot delete [vm-name] [name]
 ```
 
 Share
@@ -125,4 +134,5 @@ $ vagrant plugin update
 
 [노력 이기는 재능 없고 노력 외면하는 결과도 없다, asdf](https://m.blog.naver.com/PostView.nhn?blogId=sory1008&logNo=220759961657&proxyReferer=https:%2F%2Fwww.google.com%2F)  
 [YOUNG.K](https://rangken.github.io/blog/2015/vagrant-1/)  
-[다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant)](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)
+[다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant)](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)  
+[kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)
