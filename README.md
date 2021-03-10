@@ -136,4 +136,6 @@ $ vagrant plugin update
 [kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)  
 [Ruby 처음 배우기:데이터타입](https://smartbase.tistory.com/47)  
 [Joinc](https://www.joinc.co.kr/w/Site/Ruby/File)  
-[Python2.net](https://www.python2.net/questions-962144.htm)
+[Python2.net](https://www.python2.net/questions-962144.htm)  
+[브랜든의 블로그](https://brenden.tistory.com/109)  
+[alice_k106님의 블로그](https://m.blog.naver.com/PostView.nhn?blogId=alice_k106&logNo=221315933945&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F)
