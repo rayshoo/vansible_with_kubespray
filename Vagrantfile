@@ -49,7 +49,8 @@ Vagrant.configure("2") do |config|
   max_address = min_address + total_node - 1
   min_host_port = (ENV['MIN_HOST_PORT'] || 19210).to_i
   max_host_port = min_host_port + total_node - 1
-  host_file_text = read_file("environment/ansible/template/top.yaml")
+  # host_file_text = read_file("environment/ansible/template/top.yaml")
+  host_file_text = "nodes: \""
   ansible_host_file_text = ""
   ssh_auth_text = "#!/bin/bash"
   private_count = 0
@@ -70,7 +71,7 @@ Vagrant.configure("2") do |config|
       n.vm.network "private_network", ip: "#{ip_addr}"
       n.vm.network "forwarded_port", guest: 22, host: (max_host_port - private_count), auto_correct: false, id: "ssh"
       
-      host_file_text += "      - #{ip_addr} #{name}#{id}\n"
+      host_file_text += (machine == 1) ? "#{ip_addr} #{name}#{id}" : "\\n#{ip_addr} #{name}#{id}"
       if name == worker_node_name
         ansible_host_file_text += (id == worker) ? "[" + worker_group + "]" : ""
       else
@@ -88,14 +89,12 @@ Vagrant.configure("2") do |config|
         if machine < (master + worker)
           n.vm.provision "shell", path: "environment/scripts/bash_ssh_conf.sh"
         else
-          write_file(host_file_text, "environment/ansible/Ansible_produce_file.yaml")
+          write_file(host_file_text + "\"", "environment/ansible/host_vars/localhost.yaml")
           write_file(ansible_host_file_text, "environment/ansible/hosts.ini")
           write_file(ssh_auth_text, "environment/scripts/add_ssh_auth.sh")
           n.vm.provision "file", source: "environment/ansible", destination: "~/environment/ansible"
           n.vm.provision "shell", path: "environment/scripts/bootstrap.sh"
-          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_produce_file.yaml"
-          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_public.yaml"
-          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_private.yaml"
+          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_ready.yaml"
           n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
           n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_ssh_conf.yaml"
         end
