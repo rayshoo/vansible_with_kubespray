@@ -1,4 +1,4 @@
-# Vagrant to Kubernetes
+# Vansible with Kubespray
 
 ## How to Use
 
@@ -19,7 +19,7 @@ SSH password: vagrant
 $ vagrant box list
 
 // 추가
-$ vagrant box add bento/ubuntu-16.04
+$ vagrant box add bento/ubuntu-18.04
 
 // 이름 지정 추가
 $ vagrant box add centos_private  https://github.com/tommy-muehle/puppet-vagrant-boxes/releases/download/1.0.0/centos-6.6-x86_64.box
@@ -133,4 +133,7 @@ $ vagrant plugin update
 [노력 이기는 재능 없고 노력 외면하는 결과도 없다, asdf](https://m.blog.naver.com/PostView.nhn?blogId=sory1008&logNo=220759961657&proxyReferer=https:%2F%2Fwww.google.com%2F)  
 [YOUNG.K](https://rangken.github.io/blog/2015/vagrant-1/)  
 [다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant)](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)  
-[kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)
+[kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)  
+[Ruby 처음 배우기:데이터타입](https://smartbase.tistory.com/47)  
+[Joinc](https://www.joinc.co.kr/w/Site/Ruby/File)  
+[Python2.net](https://www.python2.net/questions-962144.htm)

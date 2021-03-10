@@ -3,27 +3,13 @@
   hosts: localhost
   gather_facts: yes
   tasks:
-    - name: Add "/etc/hosts"
+    - name: Add /etc/hosts
       blockinfile: |
         dest=/etc/hosts
         content="
-        192.168.55.50 m1
-        192.168.55.51 m2
-        192.168.55.52 w1
-        192.168.55.53 w2
-        # 192.168.55.54 w2"
-
-    - name: Add "/etc/ansible/hosts"
-      blockinfile: |
-        dest=/etc/ansible/hosts
-        content="
-        [master]
-        m1
-        m2
-        # m3
-        [worker]
-        w1
-        w2"
+        {% for node in nodes %}
+        {{ node }}
+        {% endfor %}"
 
     - name: Install sshpass for Authentication (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
@@ -64,30 +50,3 @@
       apt:
         name: "git"
         state: present
-
-    - name: Download pathogen.vim
-      shell: "curl -fLo /home/vagrant/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
-    
-    - name: Git clone vim-ansible-yaml
-      git:
-        repo: 'https://github.com/chase/vim-ansible-yaml.git'
-        dest: /home/vagrant/.vim/bundle/vim-ansible-yaml
-
-    - name: Configure vimrc
-      lineinfile:
-        dest: /home/vagrant/.vimrc
-        line: "{{ item }}"
-      with_items:
-        - "set number"
-        - "execute pathogen#infect()"
-        - "syntax on"
-        - "autocmd FileType yaml setlocal ai ts=2 sw=2 et"
-
-    - name: Configure Bashrc
-      lineinfile:
-        dest: /home/vagrant/.bashrc
-        line: "{{ item }}"
-      with_items:
-        - "alias vi='vim'"
-        - "alias ans='ansible'"
-        - "alias anp='ansible-playbook'"
