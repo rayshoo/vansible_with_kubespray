@@ -88,13 +88,13 @@ Vagrant.configure("2") do |config|
         if machine < (master + worker)
           n.vm.provision "shell", path: "environment/scripts/bash_ssh_conf.sh"
         else
-          write_file(host_file_text, "environment/ansible/temp/Ansible_produce_file.yaml")
+          write_file(host_file_text, "environment/ansible/Ansible_produce_file.yaml")
           write_file(ansible_host_file_text, "environment/ansible/hosts.ini")
           write_file(ssh_auth_text, "environment/scripts/add_ssh_auth.sh")
           n.vm.provision "file", source: "environment/ansible", destination: "~/environment/ansible"
           n.vm.provision "shell", path: "environment/scripts/bootstrap.sh"
-          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/temp/Ansible_produce_file.yaml"
-          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/temp/Ansible_env_public.yaml"
+          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_produce_file.yaml"
+          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_public.yaml"
           n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_private.yaml"
           n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
           n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_ssh_conf.yaml"

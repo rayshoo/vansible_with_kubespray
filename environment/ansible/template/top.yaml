@@ -3,7 +3,7 @@
   gather_facts: no
   tasks:
     - template:
-        src: ../template/Ansible_env_public.j2
+        src: template/Ansible_env_public.j2
         dest: Ansible_env_public.yaml
   vars:
     nodes:
