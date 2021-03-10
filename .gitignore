@@ -1,1 +1,5 @@
 .vagrant
+
+environment/ansible/Ansible_produce_file.yaml
+environment/ansible/hosts.ini
+environment/scripts/add_ssh_auth.sh
