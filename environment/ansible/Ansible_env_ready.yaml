@@ -49,12 +49,23 @@
         state: present
 
     - name: Download pathogen.vim
-      shell: "curl -fLo /home/vagrant/.vim/autoload/pathogen.vim https://tpo.pe/pathogen.vim"
-    
-    - name: Git clone vim-ansible-yaml
-      git:
-        repo: 'https://github.com/chase/vim-ansible-yaml.git'
-        dest: /home/vagrant/.vim/bundle/vim-ansible-yaml
+      get_url:
+        url: https://tpo.pe/pathogen.vim
+        dest: /home/vagrant/.vim/autoload/pathogen.vim
+        mode: 0644
+        owner: vagrant
+        group: vagrant
+
+    - name: Download vim-ansible-yaml.tar.gz
+      get_url:
+        url: https://github.com/chase/vim-ansible-yaml/archive/v1.0.tar.gz
+        dest: /home/vagrant/.vim/bundle/v1.0.tar.gz
+
+    - name: Unarchive vim-ansible-yaml.tar.gz
+      unarchive:
+        src: /home/vagrant/.vim/bundle/v1.0.tar.gz
+        dest: /home/vagrant/.vim/bundle/
+        mode: 0755
 
     - name: Configure vimrc
       lineinfile:
@@ -74,3 +85,19 @@
         - "alias vi='vim'"
         - "alias ans='ansible'"
         - "alias anp='ansible-playbook'"
+
+    - name: Copy Ansible ansible.cfg file to home direction
+      copy:
+        src: ansible.cfg
+        dest: /home/vagrant
+        owner: vagrant
+        group: vagrant
+        mode: 0664
+
+    - name: Copy Ansible hosts.ini file to home direction
+      copy:
+        src: hosts.ini
+        dest: /home/vagrant
+        owner: vagrant
+        group: vagrant
+        mode: 0664

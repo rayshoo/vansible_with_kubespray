@@ -130,12 +130,27 @@ $ vagrant plugin update
 
 ### 참고한 곳
 
+ruby  
+[Ruby 처음 배우기:데이터타입](https://smartbase.tistory.com/47)  
+[Joinc](https://www.joinc.co.kr/w/Site/Ruby/File)
+
+vagrant  
 [노력 이기는 재능 없고 노력 외면하는 결과도 없다, asdf](https://m.blog.naver.com/PostView.nhn?blogId=sory1008&logNo=220759961657&proxyReferer=https:%2F%2Fwww.google.com%2F)  
 [YOUNG.K](https://rangken.github.io/blog/2015/vagrant-1/)  
-[다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant)](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)  
-[kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)  
-[Ruby 처음 배우기:데이터타입](https://smartbase.tistory.com/47)  
-[Joinc](https://www.joinc.co.kr/w/Site/Ruby/File)  
-[Python2.net](https://www.python2.net/questions-962144.htm)  
+[다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant)](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)
+
+ansible  
+[세모데](https://semode.tistory.com/m/164)  
+[Sentimental Programmer](https://yoonbh2714.blogspot.com/2020/09/ansible-ssh-password.html)  
+[부들잎의 이것저것](https://forteleaf.tistory.com/entry/ansible-%EC%9E%90%EB%8F%99%ED%99%94%EC%9D%98-%EC%8B%9C%EC%9E%91)
+
+python j2 template  
+[Python2.net](https://www.python2.net/questions-962144.htm)
+
+kubespray  
 [브랜든의 블로그](https://brenden.tistory.com/109)  
-[alice_k106님의 블로그](https://m.blog.naver.com/PostView.nhn?blogId=alice_k106&logNo=221315933945&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F)
+[alice_k106님의 블로그](https://m.blog.naver.com/PostView.nhn?blogId=alice_k106&logNo=221315933945&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F)  
+[teamsmiley](https://teamsmiley.github.io/2020/09/30/kubespray-01-vagrant/)
+
+git repository  
+[kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)
