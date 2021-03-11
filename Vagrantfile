@@ -53,6 +53,7 @@ Vagrant.configure("2") do |config|
   host_file_text = "nodes: \""
   ansible_host_file_text = ""
   ssh_auth_text = "#!/bin/bash"
+  ssh_copy_text = "#!/bin/bash"
   private_count = 0
 
   ansible_provision = convert_string_to_boolean(ENV['ANSIBLE_PROVISION'] || false)
@@ -92,10 +93,6 @@ Vagrant.configure("2") do |config|
           ssh_auth_text += "\n\necho -e \"change #{name}#{id} to #{name}#{id},#{ip_addr}\\nif the localhost address is wrong in known hosts...\\n\\nresult : \\n\""
           ssh_auth_text += "\ncat /home/vagrant/.ssh/known_hosts | grep #{name}#{id}"
         end
-      end
-      
-      
-      if ansible_provision == true
         if machine < (master + worker)
           n.vm.provision "shell", path: "environment/scripts/bash_ssh_conf.sh"
         else
@@ -110,11 +107,15 @@ Vagrant.configure("2") do |config|
         end
       end
       if k8s_provision == true
+        ssh_copy_text += "\ncat /home/vagrant/.ssh/id_rsa.pub | sshpass -p vagrant ssh -o StrictHostKeyChecking=no vagrant@#{name}#{id} \"sudo tee /home/vagrant/.ssh/authorized_keys\""
         if machine == (master + worker)
+          write_file(ssh_copy_text, "environment/scripts/ssh_copy_id.sh")
           n.vm.provision "file", source: "environment/kubernetes", destination: "~/environment/kubernetes"
-          # n.vm.provision "file", source: "environment/ansible/ansible.cfg", destination: "~/environment/kubernetes/"
-          # n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
+          n.vm.provision "file", source: "environment/ansible/ansible.cfg", destination: "~/environment/kubernetes/"
+          n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
+          n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/Kubespray_env_ready.yaml"
           n.vm.provision "shell", inline: "yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"", privileged: false
+          n.vm.provision "shell", path: "environment/scripts/ssh_copy_id.sh"
         end
       end
       private_count += 1
