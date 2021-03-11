@@ -53,9 +53,12 @@ Vagrant.configure("2") do |config|
   host_file_text = "nodes: \""
   ansible_host_file_text = ""
   ssh_auth_text = "#!/bin/bash"
+  ssh_copy_text = "#!/bin/bash"
   private_count = 0
 
   ansible_provision = convert_string_to_boolean(ENV['ANSIBLE_PROVISION'] || false)
+  k8s_provision = convert_string_to_boolean(ENV['KUBERNETES_PROVISION'] || false)
+
   master_group = ENV['MASTER_NODE_ANSIBLE_GROUP_NAME'] || "master"
   worker_group = ENV['WORKER_NODE_ANSIBLE_GROUP_NAME'] || "worker"
 
@@ -70,22 +73,26 @@ Vagrant.configure("2") do |config|
       ip_addr = "#{network_address}#{machine_address}"
       n.vm.network "private_network", ip: "#{ip_addr}"
       n.vm.network "forwarded_port", guest: 22, host: (max_host_port - private_count), auto_correct: false, id: "ssh"
-      
-      host_file_text += (machine == 1) ? "#{ip_addr} #{name}#{id}" : "\\n#{ip_addr} #{name}#{id}"
-      if name == worker_node_name
-        ansible_host_file_text += (id == worker) ? "[" + worker_group + "]" : ""
-      else
-        ansible_host_file_text += (id == master) ? (worker == 0) ? "[" + master_group + "]" : "\n\n[" + master_group + "]" : ""
-      end
-      ansible_host_file_text += "\n#{name}#{id}"
-      ssh_auth_text += "\nsshpass -p vagrant ssh -T -o StrictHostKeyChecking=no vagrant@#{name}#{id}"
-      
       n.vm.provider :virtualbox do |vb, override|
         vb.name = "#{n.vm.hostname}"
         set_vbox(vb, override, os_image)
         vb.cpus = (machine <= worker) ? 1 : 2
       end
+      
       if ansible_provision == true
+        host_file_text += (machine == 1) ? "#{ip_addr} #{name}#{id}" : "\\n#{ip_addr} #{name}#{id}"
+        if name == worker_node_name
+          ansible_host_file_text += (id == worker) ? "[" + worker_group + "]" : ""
+        else
+          ansible_host_file_text += (id == master) ? (worker == 0) ? "[" + master_group + "]" : "\n\n[" + master_group + "]" : ""
+        end
+        ansible_host_file_text += "\n#{name}#{id}"
+        ssh_auth_text += "\nsshpass -p vagrant ssh -T -o StrictHostKeyChecking=no vagrant@#{name}#{id} \"exit\""
+        if (machine == master + worker)
+          ssh_auth_text += "\n\nsed -i -e 's/#{name}#{id} /#{name}#{id},#{ip_addr} /g' /home/vagrant/.ssh/known_hosts"
+          ssh_auth_text += "\n\necho -e \"change #{name}#{id} to #{name}#{id},#{ip_addr}\\nif the localhost address is wrong in known hosts...\\n\\nresult : \\n\""
+          ssh_auth_text += "\ncat /home/vagrant/.ssh/known_hosts | grep #{name}#{id}"
+        end
         if machine < (master + worker)
           n.vm.provision "shell", path: "environment/scripts/bash_ssh_conf.sh"
         else
@@ -95,8 +102,20 @@ Vagrant.configure("2") do |config|
           n.vm.provision "file", source: "environment/ansible", destination: "~/environment/ansible"
           n.vm.provision "shell", path: "environment/scripts/bootstrap.sh"
           n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_ready.yaml"
-          n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
           n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_ssh_conf.yaml"
+          n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
+        end
+      end
+      if k8s_provision == true
+        ssh_copy_text += "\ncat /home/vagrant/.ssh/id_rsa.pub | sshpass -p vagrant ssh -o StrictHostKeyChecking=no vagrant@#{name}#{id} \"sudo tee /home/vagrant/.ssh/authorized_keys\""
+        if machine == (master + worker)
+          write_file(ssh_copy_text, "environment/scripts/ssh_copy_id.sh")
+          n.vm.provision "file", source: "environment/kubernetes", destination: "~/environment/kubernetes"
+          n.vm.provision "file", source: "environment/ansible/ansible.cfg", destination: "~/environment/kubernetes/"
+          n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
+          n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/Kubespray_env_ready.yaml"
+          n.vm.provision "shell", inline: "yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"", privileged: false
+          n.vm.provision "shell", path: "environment/scripts/ssh_copy_id.sh"
         end
       end
       private_count += 1
