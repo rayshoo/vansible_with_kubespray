@@ -3,11 +3,11 @@
 ## 소개
 
 Vagrant, Ansible, Kubespray(Docker+Kubernetes)를 사용하여<br/>
-손쉽고 빠르게 개발, 학습, 강의 환경 구축을 목적으로 만들어진 IaC(Infra as Code) 도구<br/><hr/>
+손쉽고 빠르게 개발, 학습, 강의 환경 구축을 목적으로 만들어진 IaC(Infra as Code) 도구<br/>
 
 ## 사용 전 필요 조건
 
-사용자의 환경에 [Vagrant](https://www.vagrantup.com/downloads)와 [VirtualBox](https://www.virtualbox.org/wiki/Downloads)가 미리 설치되있어야 함<hr/>
+사용자의 환경에 [Vagrant](https://www.vagrantup.com/downloads)와 [VirtualBox](https://www.virtualbox.org/wiki/Downloads)가 미리 설치되있어야 함
 
 ## 사용 방법
 
@@ -29,11 +29,11 @@ $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
 ## Introduce
 
 Using Vagrant, Ansible, Kubespray (Docker + Kubernetes)<br/>
-IaC (Infra as Code) tool designed for easy and fast development, learning, and lecture environment construction<hr/>
+IaC (Infra as Code) tool designed for easy and fast development, learning, and lecture environment construction
 
 ## Requirements before use
 
-Vagrant and VirtualBox must be installed in the user's environment in advance<hr/>
+Vagrant and VirtualBox must be installed in the user's environment in advance
 
 ## How to Use
 
@@ -66,7 +66,9 @@ $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
 
 ### [Docker](https://docs.docker.com/)
 
-### [Kubernetes](https://kubernetes.io/ko/docs/home/)<hr/>
+### [Kubernetes](https://kubernetes.io/ko/docs/home/)
+
+<hr/>
 
 ## 참고한 곳, Site referenced
 
