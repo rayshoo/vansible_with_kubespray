@@ -14,9 +14,9 @@ Vagrant, Ansible, Kubespray(Docker+Kubernetes)를 사용하여<br/>
 <span>1.</span> [.env](.env) 파일 구성
 
 <span>2.</span> kubespray를 수동으로 구성하고 싶다면, [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L33)으로 옵션을 설정하고,
-**cluster folder** 를 목적에 맞게 구성한다
+[cluster folder](cluster) 를 목적에 맞게 구성한다
 
-<span>3.</span> Vagrantfile이 위치한 경로에서 하단의 명령어를 bash 쉘에 입력한다
+<span>3.</span> [Vagrantfile](Vagrantfile)이 위치한 경로에서 하단의 명령어를 bash 쉘에 입력한다
 
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
@@ -40,9 +40,9 @@ Vagrant and VirtualBox must be installed in the user's environment in advance
 <span>1.</span> Configure the [.env](.env) file
 
 <span>2.</span> If you want to configure kubespray with manually, set [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L33)
-then configure the **cluster folder**
+then configure the [cluster folder](cluster)
 
-<span>3.</span> Type the following command into the bash shell in the path where the Vagrantfile is located.
+<span>3.</span> Type the following command into the bash shell in the path where the [Vagrantfile](Vagrantfile) is located.
 
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
