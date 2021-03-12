@@ -1,38 +1,5 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
-def set_vbox(vb, config, os_image)
-  vb.gui = false
-  vb.memory = 2048
-
-  case os_image
-  when :centos7
-    config.vm.box = "bento/centos-7.8"
-  when :ubuntu18
-    config.vm.box = "bento/ubuntu-18.04"
-  when :ubuntu20
-    config.vm.box = "ubuntu/focal64"
-  else
-    config.vm.box = os_image.to_s
-  end
-end
-
-def convert_string_to_boolean(obj)
-  value = obj.to_s.downcase
-  return (value == "yes" or value == "true")
-end
-
-def read_file(file)
-  aFile = File.new(file, 'r')
-  fSize = aFile.stat.size
-  content = aFile.sysread(fSize)
-  return content
-end
-
-def write_file(text, name)
-  aFile = File.new(name, "w")
-  aFile.syswrite(text)
-end
-
 Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox"
   config.vm.synced_folder ".", "/vagrant", disabled: true
@@ -49,11 +16,12 @@ Vagrant.configure("2") do |config|
   max_address = min_address + total_node - 1
   min_host_port = (ENV['MIN_HOST_PORT'] || 19210).to_i
   max_host_port = min_host_port + total_node - 1
-  # host_file_text = read_file("environment/ansible/template/top.yaml")
+
   host_file_text = "nodes: \""
   ansible_host_file_text = ""
   ssh_auth_text = "#!/bin/bash"
   ssh_copy_text = "#!/bin/bash"
+  
   private_count = 0
 
   ansible_provision = convert_string_to_boolean(ENV['ANSIBLE_PROVISION'] || false)
@@ -88,11 +56,6 @@ Vagrant.configure("2") do |config|
         end
         ansible_host_file_text += "\n#{name}#{id}"
         ssh_auth_text += "\nsshpass -p vagrant ssh -T -o StrictHostKeyChecking=no vagrant@#{name}#{id} \"exit\""
-        if (machine == master + worker)
-          ssh_auth_text += "\n\nsed -i -e 's/#{name}#{id} /#{name}#{id},#{ip_addr} /g' /home/vagrant/.ssh/known_hosts"
-          ssh_auth_text += "\n\necho -e \"change #{name}#{id} to #{name}#{id},#{ip_addr}\\nif the localhost address is wrong in known hosts...\\n\\nresult : \\n\""
-          ssh_auth_text += "\ncat /home/vagrant/.ssh/known_hosts | grep #{name}#{id}"
-        end
         if machine < (master + worker)
           n.vm.provision "shell", path: "environment/scripts/bash_ssh_conf.sh"
         else
@@ -107,7 +70,7 @@ Vagrant.configure("2") do |config|
         end
       end
       if k8s_provision == true
-        ssh_copy_text += "\ncat /home/vagrant/.ssh/id_rsa.pub | sshpass -p vagrant ssh -o StrictHostKeyChecking=no vagrant@#{name}#{id} \"sudo tee /home/vagrant/.ssh/authorized_keys\""
+        ssh_copy_text += "\ncat /home/vagrant/.ssh/id_rsa.pub | sshpass -p vagrant ssh -o StrictHostKeyChecking=no vagrant@#{ip_addr} \"sudo tee -a /home/vagrant/.ssh/authorized_keys\""
         if machine == (master + worker)
           write_file(ssh_copy_text, "environment/scripts/ssh_copy_id.sh")
           n.vm.provision "file", source: "environment/kubernetes", destination: "~/environment/kubernetes"
@@ -115,13 +78,47 @@ Vagrant.configure("2") do |config|
           n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
           n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/Kubespray_env_ready.yaml"
           n.vm.provision "shell", inline: "yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"", privileged: false
-          n.vm.provision "shell", path: "environment/scripts/ssh_copy_id.sh"
+          n.vm.provision "shell", path: "environment/scripts/ssh_copy_id.sh", privileged: false
         end
       end
       private_count += 1
     end
   end
 end
+
+def set_vbox(vb, config, os_image)
+  vb.gui = convert_string_to_boolean(ENV['GUI'] || false)
+  vb.memory = (ENV['MEMORY'] || 2048).to_i
+
+  case os_image
+  when :centos7
+    config.vm.box = "bento/centos-7.8"
+  when :ubuntu18
+    config.vm.box = "bento/ubuntu-18.04"
+  when :ubuntu20
+    config.vm.box = "ubuntu/focal64"
+  else
+    config.vm.box = os_image.to_s
+  end
+end
+
+def convert_string_to_boolean(obj)
+  value = obj.to_s.downcase
+  return (value == "yes" or value == "true")
+end
+
+def read_file(file)
+  aFile = File.new(file, 'r')
+  fSize = aFile.stat.size
+  content = aFile.sysread(fSize)
+  return content
+end
+
+def write_file(text, name)
+  aFile = File.new(name, "w")
+  aFile.syswrite(text)
+end
+
 case Random.new.rand(1..5)
 when 1
   puts "⠀⠀⠀⠀⠀  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣷⠆
@@ -216,3 +213,4 @@ when 5
   ⢸⡏⢻⣦⠸⣿⣼⣿⠀⣿⣤⣾⠇⠹⣯⣭⡅⢸⣿⠀⢸⣿⠀⣿⠈⢿⣭⣭⡁⢻⣧⣄⢻⣯⣭⡅⢠⣬⣿⠇
   ⠀⠀⠀⠀⠀⠈⠉⠀⠀⠈⠉⠀⠀⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠀⠉⠁⠀⠈⠉⠀⠀⠉⠁"
 end
+puts "\nVansible with Kubespray\n- github.com/dfnk5516/vansible_with_kubespray"

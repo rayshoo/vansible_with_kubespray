@@ -3,14 +3,46 @@
   hosts: localhost
   gather_facts: yes
   tasks:
+    - name: Install epel-release (RHEL/CentOS)
+      when: ansible_os_family == "RedHat"
+      yum:
+        name: epel-release
+        state: present
+
     - name: Install pip for Kubespray (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
       yum:
         name: python-pip
         state: present
 
+    - name: Update apt packages (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      become: true
+      apt:
+        update_cache: yes
+
     - name: Install pip3 for Kubespray (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
       apt:
         name: python3-pip
         state: present
+
+    - name: Download Kubespray
+      get_url:
+        url: https://github.com/kubernetes-sigs/kubespray/archive/v2.15.0.tar.gz
+        dest: /home/vagrant/environment/kubernetes/v2.15.0.tar.gz
+        mode: 0664
+        owner: vagrant
+        group: vagrant
+
+    - name: Unarchive vim-ansible-yaml.tar.gz
+      unarchive:
+        src: /home/vagrant/environment/kubernetes/v2.15.0.tar.gz
+        dest: /home/vagrant/environment/kubernetes/
+        mode: 0775
+        owner: vagrant
+        group: vagrant
+
+    - name: Install specified python requirements
+      pip:
+        requirements: /my_app/requirements.txt

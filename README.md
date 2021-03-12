@@ -1,156 +1,106 @@
 # Vansible with Kubespray
 
-## How to Use
+## 소개
+
+Vagrant, Ansible, Kubespray(Docker+Kubernetes)를 사용하여<br/>
+손쉽고 빠르게 개발, 학습, 강의 환경 구축을 목적으로 만들어진 IaC(Infra as Code) 도구<br/><hr/>
+
+## 사용 전 필요 조건
+
+사용자의 환경에 [Vagrant](https://www.vagrantup.com/downloads)와 [VirtualBox](https://www.virtualbox.org/wiki/Downloads)가 미리 설치되있어야 함<hr/>
+
+## 사용 방법
+
+<span>1.</span> [.env](.env) 파일 구성
+
+<span>2.</span> kubespray를 수동으로 구성하고 싶다면, [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L33)으로 옵션을 설정하고,
+**cluster folder** 를 목적에 맞게 구성한다
+
+<span>3.</span> Vagrantfile이 위치한 경로에서 하단의 명령어를 bash 쉘에 입력한다
 
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
 $ vagrant up
 $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
-$ ansible all -m ping -k
-SSH password: vagrant
 ```
 
-## vagrant
+<hr/>
 
-박스 관련 명령어
+## Introduce
+
+Using Vagrant, Ansible, Kubespray (Docker + Kubernetes)<br/>
+IaC (Infra as Code) tool designed for easy and fast development, learning, and lecture environment construction<hr/>
+
+## Requirements before use
+
+Vagrant and VirtualBox must be installed in the user's environment in advance<hr/>
+
+## How to Use
+
+<span>1.</span> Configure the [.env](.env) file
+
+<span>2.</span> If you want to configure kubespray with manually, set [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L33)
+then configure the **cluster folder**
+
+<span>3.</span> Type the following command into the bash shell in the path where the Vagrantfile is located.
 
 ```sh
-// 조회
-$ vagrant box list
-
-// 추가
-$ vagrant box add bento/ubuntu-18.04
-
-// 이름 지정 추가
-$ vagrant box add centos_private  https://github.com/tommy-muehle/puppet-vagrant-boxes/releases/download/1.0.0/centos-6.6-x86_64.box
-
-// 삭제
-$ vagrant box remove [name]
-```
-
-가상머신 관련 명령어
-
-```sh
-// 조회
-$ vagrant status [name|id]
-$ vagrant global-status
-
-// 실행 (실행 시 박스가 없으면 자동으로 다운로드 받는다)
+$ vagrant plugin install vagrant-env vagrant-vbguest
 $ vagrant up
-
-// 접속
-$ vagrant ssh [name|id] [--extra_ssh_args]
-
-// 종료
-$ vagrant halt [name|id]
-$ vagrant halting [name|id]
-
-// 세팅 적용 (ex: 네트워크 설정)
-$ vagrant reload [name|id]
-
-// 프로비저닝 적용
-$ vagrant provision [vm-name]
-
-// 삭제
-$ vagrant destroy
-$ vagrant destory --force
-$ vagrant destory --parallel
-
-// 현재 실행 상태 저장,종료(디스크와 램을 사용하고 있는 상태로 종료)
-$ vagrant suspend [name|id]
-
-// suspend 해제 (vagrant up 역시 가능)
-$ vagrant resume [name|id]
-
-// ssh-config 조회(network forwarded port 설정되있어야함)
-$ vagrant ssh-config
-
-// 스냅샷 조회
-$ vagrant snapshot list
-
-// 스냅샷 저장
-$ vagrant snapshot save [vm-name] [name]
-
-// 스냅샷 복원
-$ vagrant snapshot restore [vm-name] [name]
-
-// 스냅샷 삭제
-$ vagrant snapshot delete [vm-name] [name]
+$ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
 ```
 
-Share
+<hr/>
 
-```sh
-// Vagrantfile 공유
-$ vagrant login vagrant share
-```
+## 개인 문서, Private Documents
 
-Providers
+### [https://github.com/dfnk5516/vansible_with_kubespray/wiki](https://github.com/dfnk5516/vansible_with_kubespray/wiki)
 
-```sh
-// default provider 변경
-$ vagrant up –provider=vmware_fusion vagrant up –provider=aws
-```
+<hr/>
 
-Networking
+## 공식 문서, Official Documents
 
-```Vagrantfile
-Vagrant.configure("2") do |config|
-  config.vm.box = "hashicorp/precise32"
-  config.vm.provision :shell, path: "bootstrap.sh"
-  # 호스트의 4567 를 게스트 80으로 연결
-  # 브라우져에서 127.0.0.1:4567 연결하면
-  # 호스트의 apache 80번 포트로 연결된다.
-  config.vm.network :forwarded_port, host: 4567, guest: 80
-end
-```
+### [Vagrant](https://www.vagrantup.com/docs)
 
-Etc
+### [Ansible](https://docs.ansible.com/)
 
-```sh
-// 최신 업데이트 된 박스들 조회
-$ vagrant box outdated
+### [Docker](https://docs.docker.com/)
 
-// 박스 삭제(address)
-$ vagrant remove <address>
+### [Kubernetes](https://kubernetes.io/ko/docs/home/)<hr/>
 
-// 현재 실행중인 virtualbox 를 재사용 가능한 box로 만든다
-$ vagrant package
+## 참고한 곳, Site referenced
 
-$ vagrant update
-$ vagrant repackage
+### ruby<br/>
 
-// vagrant plugin
-$ vagrant plugin install
-$ vagrant plugin license
-$ vagrant plugin list
-$ vagrant plugin uninstall
-$ vagrant plugin update
-```
+[Ruby 처음 배우기:데이터타입,조묵헌](https://smartbase.tistory.com/47)<br/>
+[Joinc,yundream](https://www.joinc.co.kr/w/Site/Ruby/File)<br/>
 
-### 참고한 곳
+### vagrant<br/>
 
-ruby  
-[Ruby 처음 배우기:데이터타입](https://smartbase.tistory.com/47)  
-[Joinc](https://www.joinc.co.kr/w/Site/Ruby/File)
+[노력 이기는 재능 없고 노력 외면하는 결과도 없다,asdf](https://m.blog.naver.com/PostView.nhn?blogId=sory1008&logNo=220759961657&proxyReferer=https:%2F%2Fwww.google.com%2F)<br/>
+[YOUNG.K](https://rangken.github.io/blog/2015/vagrant-1/)
 
-vagrant  
-[노력 이기는 재능 없고 노력 외면하는 결과도 없다, asdf](https://m.blog.naver.com/PostView.nhn?blogId=sory1008&logNo=220759961657&proxyReferer=https:%2F%2Fwww.google.com%2F)  
-[YOUNG.K](https://rangken.github.io/blog/2015/vagrant-1/)  
-[다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant)](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)
+### ansible<br/>
 
-ansible  
-[세모데](https://semode.tistory.com/m/164)  
-[Sentimental Programmer](https://yoonbh2714.blogspot.com/2020/09/ansible-ssh-password.html)  
-[부들잎의 이것저것](https://forteleaf.tistory.com/entry/ansible-%EC%9E%90%EB%8F%99%ED%99%94%EC%9D%98-%EC%8B%9C%EC%9E%91)
+[세모데](https://semode.tistory.com/m/164)<br/>
+[Sentimental Programmer](https://yoonbh2714.blogspot.com/2020/09/ansible-ssh-password.html)<br/>
+[부들잎의 이것저것](https://forteleaf.tistory.com/entry/ansible-%EC%9E%90%EB%8F%99%ED%99%94%EC%9D%98-%EC%8B%9C%EC%9E%91)<br/>
 
-python j2 template  
-[Python2.net](https://www.python2.net/questions-962144.htm)
+### python j2 template<br/>
 
-kubespray  
-[브랜든의 블로그](https://brenden.tistory.com/109)  
-[alice_k106님의 블로그](https://m.blog.naver.com/PostView.nhn?blogId=alice_k106&logNo=221315933945&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F)  
-[teamsmiley](https://teamsmiley.github.io/2020/09/30/kubespray-01-vagrant/)
+[Python2.net](https://www.python2.net/questions-962144.htm)<br/>
 
-git repository  
-[kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)
+### kubespray<br/>
+
+[브랜든의 블로그](https://brenden.tistory.com/109)<br/>
+[alice_k106님의 블로그](https://m.blog.naver.com/PostView.nhn?blogId=alice_k106&logNo=221315933945&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F)<br/>
+[teamsmiley 블로그](https://teamsmiley.github.io/2020/09/30/kubespray-01-vagrant/)<br/>
+
+### lecture<br/>
+
+[다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant),조훈](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)<br/>
+
+### git repository<br/>
+
+[kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)<br/>
+[kubernetes-sigs/kubespray](https://github.com/kubernetes-sigs/kubespray)
