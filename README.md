@@ -69,17 +69,26 @@ $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
 ### [Kubernetes](https://kubernetes.io/ko/docs/home/)
 
 <hr/>
+ 
+## 참고한 책, Book referenced
+
+카와무라 세이고,기타노 타로오,나카야마 타카히로,구사카베 타카아키,리쿠르트 테크놀로지<br/>
+번역 양성건,영진닷컴(2020),IT 운용 체제 변화를 위한데브옵스
+
+정원천,공용준,홍석용,정경록,동양북스(2020),쿠버네티스 입문
+
+<hr/>
 
 ## 참고한 곳, Site referenced
 
 ### ruby<br/>
 
-[Ruby 처음 배우기:데이터타입,조묵헌](https://smartbase.tistory.com/47)<br/>
-[Joinc,yundream](https://www.joinc.co.kr/w/Site/Ruby/File)<br/>
+[조묵헌,Ruby 처음 배우기:데이터타입](https://smartbase.tistory.com/47)<br/>
+[yundream,Joinc](https://www.joinc.co.kr/w/Site/Ruby/File)<br/>
 
 ### vagrant<br/>
 
-[노력 이기는 재능 없고 노력 외면하는 결과도 없다,asdf](https://m.blog.naver.com/PostView.nhn?blogId=sory1008&logNo=220759961657&proxyReferer=https:%2F%2Fwww.google.com%2F)<br/>
+[asdf,노력 이기는 재능 없고 노력 외면하는 결과도 없다](https://m.blog.naver.com/PostView.nhn?blogId=sory1008&logNo=220759961657&proxyReferer=https:%2F%2Fwww.google.com%2F)<br/>
 [YOUNG.K](https://rangken.github.io/blog/2015/vagrant-1/)
 
 ### ansible<br/>
@@ -100,7 +109,7 @@ $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
 
 ### lecture<br/>
 
-[다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant),조훈](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)<br/>
+[조훈,다양한 환경을 앤서블(Ansible)로 관리하기 with 베이그런트(Vagrant)](https://www.inflearn.com/course/ansible-%EC%9D%91%EC%9A%A9/dashboard)<br/>
 
 ### git repository<br/>
 
