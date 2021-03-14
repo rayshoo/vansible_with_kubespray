@@ -24,7 +24,7 @@ Vagrant.configure("2") do |config|
   worker_text = ""
   
   ssh_auth_text = "#!/bin/bash"
-  ssh_copy_text = "#!/bin/bash"
+  ssh_copy_text = "#!/bin/bash\nif [ ! -f \".ssh/id_rsa\" ]; then\n  yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"\nelse\n  echo \"id_rsa file already exists. Skip ssh-keygen...\"\nfi\n"
   
   private_count = 0
   
@@ -94,11 +94,6 @@ Vagrant.configure("2") do |config|
           n.vm.provision "file", source: "environment/ansible/ansible.cfg", destination: "~/environment/kubernetes/"
           n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
           n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/Kubespray_env_ready.yaml", privileged: false
-
-          if (convert_string_to_boolean(ENV['SSH_KEY_GENERATED']) != true && true )
-          n.vm.provision "shell", inline: "yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"", privileged: false
-          end
-          
           n.vm.provision "shell", path: "environment/scripts/ssh_copy_id.sh", privileged: false
           if cluster_structure
             master_text += "\n#{name}#{id}"

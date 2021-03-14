@@ -54,8 +54,26 @@
         name: "git"
         state: present
 
-    - name: Copy pathogen.vim file to .vim/autoload
+    - name: Make directory .vim/autoload .vim/bundle
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - "{{ local_home }}/.vim/autoload"
+        - "{{ local_home }}/.vim/bundle"
+
+    - name: Change permissions on .vim/autoload .vim/bundle
       become: yes
+      file:
+        path: "{{ item }}"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+      with_items:
+        - "{{ local_home }}/.vim/autoload"
+        - "{{ local_home }}/.vim/bundle"
+        - "{{ local_home }}/.vim"
+
+    - name: Copy pathogen.vim file to .vim/autoload
       copy:
         src: custom/pathogen.vim
         dest: "{{ local_home }}/.vim/autoload/"
@@ -64,7 +82,6 @@
         mode: 0664
 
     - name: Copy vim-ansible-yaml.tar.gz file to .vim/bundle
-      become: yes
       copy:
         src: custom/vim-ansible-yaml-1.0.tar.gz
         dest: "{{ local_home }}/.vim/bundle/"
@@ -73,7 +90,6 @@
         mode: 0664
 
     - name: Unarchive vim-ansible-yaml.tar.gz
-      become: yes
       unarchive:
         src: "{{ local_home }}/.vim/bundle/vim-ansible-yaml-1.0.tar.gz"
         dest: "{{ local_home }}/.vim/bundle/"
@@ -81,10 +97,13 @@
         group: "{{ local_user }}"
         mode: 0755
     
-    - name: Remove custom folder
+    - name: Remove custom folder and vim-ansible-yaml.tar.gz
       file:
-        path: custom
+        path: "{{ item }}"
         state: absent
+      with_items:
+        - "custom"
+        - "{{ local_home }}/.vim/bundle/vim-ansible-yaml-1.0.tar.gz"
 
     - name: Configure vimrc
       lineinfile:
