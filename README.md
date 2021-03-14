@@ -29,7 +29,6 @@ $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
 몇 가지 alias가 자동 등록된다.
 
 ```
-alias vi='vim'
 alias ans='ansible'
 alias anp='ansible-playbook'
 alias k='kubectl'
@@ -73,7 +72,6 @@ $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
 Several aliases are automatically registered.
 
 ```
-alias vi='vim'
 alias ans='ansible'
 alias anp='ansible-playbook'
 alias k='kubectl'

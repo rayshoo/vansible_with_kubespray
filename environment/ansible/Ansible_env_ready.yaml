@@ -120,7 +120,6 @@
         dest: "{{ local_home }}/.bashrc"
         line: "{{ item }}"
       with_items:
-        - "alias vi='vim'"
         - "alias ans='ansible'"
         - "alias anp='ansible-playbook'"
 
