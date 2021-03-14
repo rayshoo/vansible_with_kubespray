@@ -1,0 +1,79 @@
+---
+- name: Setup for the Kubernetes's Environment
+  hosts: kube-master
+  gather_facts: yes
+  tasks:
+    - name: Creates directory
+      file:
+        path: "{{ ansible_env.HOME }}/.kube"
+        state: directory
+
+    - name: Mode 777 for admin.conf temporary"
+      become: yes
+      file:
+        path: "/etc/kubernetes/admin.conf"
+        mode: 0777
+
+    - name: Make kubectl work for non-root user
+      copy:
+        src: /etc/kubernetes/admin.conf
+        dest: "{{ ansible_env.HOME }}/.kube/config"
+        owner: "{{ ansible_env.USER }}"
+        group: "{{ ansible_env.USER }}"
+        mode: 0600
+
+    - name: Mode 600 for admin.conf again"
+      become: yes
+      file:
+        path: "/etc/kubernetes/admin.conf"
+        mode: 0600
+
+    - name: Configure Bashrc
+      lineinfile:
+        dest: "{{ ansible_env.HOME }}/.bashrc"
+        line: "{{ item }}"
+      with_items:
+        - "alias k='kubectl'"
+
+    - name: import the kubeadm apt-key (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      apt_key:
+        url: "{{ kubeadm_apt_key_url }}"
+        state: present
+
+    - name : Create kubeadm source file (Debian/Ubuntu)
+      when : ansible_os_family == "Debian"
+      copy: 
+        dest: "/etc/apt/sources.list.d/kubernetes.list"
+        content: "{{ kubeadm_apt_repository }}"
+
+    - name: Update apt packages (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      apt:
+        update_cache: yes
+    
+    - name: Install kubeadm (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      apt:
+        name: kubeadm
+        state: present
+
+    - name: Add Kubernetes yum repository (RHEL/CentOS)
+      become: yes
+      when: ansible_os_family == "RedHat"
+      yum_repository:
+        name: Kubernetes
+        description: Kubernetes Repository
+        baseurl: http://yum.kubernetes.io/repos/kubernetes-el7-x86_64
+        enabled: yes
+        gpgcheck: yes
+        gpgkey: 
+          - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+          - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+    - name: Install kubeadm (RHEL/CentOS)
+      become: yes
+      when: ansible_os_family == "RedHat"
+      yum:
+        name: kubeadm
+        state: present

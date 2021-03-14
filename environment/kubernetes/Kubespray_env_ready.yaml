@@ -2,47 +2,50 @@
 - name: Setup for the Kubespray's Environment
   hosts: localhost
   gather_facts: yes
+  vars: 
+    local_user: "{{ lookup('env','USER') }}"
   tasks:
     - name: Install epel-release (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
+      become: yes
       yum:
         name: epel-release
         state: present
 
     - name: Install pip for Kubespray (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
+      become: yes
       yum:
         name: python-pip
         state: present
 
     - name: Update apt packages (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
-      become: true
+      become: yes
       apt:
         update_cache: yes
 
     - name: Install pip3 for Kubespray (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
+      become: yes
       apt:
         name: python3-pip
         state: present
 
-    - name: Download Kubespray
-      get_url:
-        url: https://github.com/kubernetes-sigs/kubespray/archive/v2.15.0.tar.gz
-        dest: /home/vagrant/environment/kubernetes/v2.15.0.tar.gz
-        mode: 0664
-        owner: vagrant
-        group: vagrant
+    - name: Git clone Kubespray
+      git:
+        repo: https://github.com/rayshoo/kubespray.git
+        dest: "{{ playbook_dir }}/kubespray"
 
-    - name: Unarchive vim-ansible-yaml.tar.gz
-      unarchive:
-        src: /home/vagrant/environment/kubernetes/v2.15.0.tar.gz
-        dest: /home/vagrant/environment/kubernetes/
-        mode: 0775
-        owner: vagrant
-        group: vagrant
+    - name: copy ansible.cfg file in Kubernetes folder
+      copy:
+        src: kubespray/ansible.cfg
+        dest: "{{ playbook_dir }}/ansible.cfg"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0664
 
     - name: Install specified python requirements
+      become: yes
       pip:
-        requirements: /my_app/requirements.txt
+        requirements: "{{ playbook_dir }}/kubespray/requirements.txt"

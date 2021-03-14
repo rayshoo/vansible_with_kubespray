@@ -19,14 +19,19 @@ Vagrant.configure("2") do |config|
 
   host_file_text = "nodes: \""
   ansible_host_file_text = ""
+  inventory_text = "[all]"
+  master_text = ""
+  worker_text = ""
+  
   ssh_auth_text = "#!/bin/bash"
   ssh_copy_text = "#!/bin/bash"
   
   private_count = 0
-
+  
   ansible_provision = convert_string_to_boolean(ENV['ANSIBLE_PROVISION'] || false)
   k8s_provision = convert_string_to_boolean(ENV['KUBERNETES_PROVISION'] || false)
-
+  cluster_structure = convert_string_to_boolean(ENV['CLUSTER_STRUCTURE_AUTO_CREATE'] || false)
+  
   master_group = ENV['MASTER_NODE_ANSIBLE_GROUP_NAME'] || "master"
   worker_group = ENV['WORKER_NODE_ANSIBLE_GROUP_NAME'] || "worker"
 
@@ -46,8 +51,9 @@ Vagrant.configure("2") do |config|
         set_vbox(vb, override, os_image)
         vb.cpus = (machine <= worker) ? 1 : 2
       end
+      n.vm.boot_timeout = 600
       
-      if ansible_provision == true
+      if ansible_provision
         host_file_text += (machine == 1) ? "#{ip_addr} #{name}#{id}" : "\\n#{ip_addr} #{name}#{id}"
         if name == worker_node_name
           ansible_host_file_text += (id == worker) ? "[" + worker_group + "]" : ""
@@ -64,21 +70,47 @@ Vagrant.configure("2") do |config|
           write_file(ssh_auth_text, "environment/scripts/add_ssh_auth.sh")
           n.vm.provision "file", source: "environment/ansible", destination: "~/environment/ansible"
           n.vm.provision "shell", path: "environment/scripts/bootstrap.sh"
-          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_ready.yaml"
+          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_ready.yaml", privileged: false
           n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_ssh_conf.yaml"
           n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
         end
       end
-      if k8s_provision == true
+      if k8s_provision
         ssh_copy_text += "\ncat /home/vagrant/.ssh/id_rsa.pub | sshpass -p vagrant ssh -o StrictHostKeyChecking=no vagrant@#{ip_addr} \"sudo tee -a /home/vagrant/.ssh/authorized_keys\""
-        if machine == (master + worker)
+        
+        if machine < (master + worker)
+          if cluster_structure
+            if name == worker_node_name
+              worker_text += "\n#{name}#{id}"
+              inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr}"
+            else
+              master_text += "\n#{name}#{id}"
+              inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr} etcd_member_name=etcd#{id}"
+            end
+          end
+        else
           write_file(ssh_copy_text, "environment/scripts/ssh_copy_id.sh")
           n.vm.provision "file", source: "environment/kubernetes", destination: "~/environment/kubernetes"
           n.vm.provision "file", source: "environment/ansible/ansible.cfg", destination: "~/environment/kubernetes/"
           n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
-          n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/Kubespray_env_ready.yaml"
+          n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/Kubespray_env_ready.yaml", privileged: false
+
+          if (convert_string_to_boolean(ENV['SSH_KEY_GENERATED']) != true && true )
           n.vm.provision "shell", inline: "yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"", privileged: false
+          end
+          
           n.vm.provision "shell", path: "environment/scripts/ssh_copy_id.sh", privileged: false
+          if cluster_structure
+            master_text += "\n#{name}#{id}"
+            inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr} etcd_member_name=etcd#{id}"
+            inventory_text += "\n\n[kube-master]#{master_text}\n\n[etcd]#{master_text}\n\n[kube-node]#{worker_text}\n\n[calico-rr]\n\n[k8s-cluster:children]\nkube-master\nkube-node\ncalico-rr"
+            write_file(inventory_text, "environment/kubernetes/inventory.ini")
+          else
+            n.vm.provision "file", source: "cluster/inventory.ini", destination: "environment/kubernetes/inventory.ini"
+            n.vm.provision "file", source: "cluster/group_vars", destination: "environment/kubernetes/kubespray/group_vars"
+          end
+          n.vm.provision "shell", inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubespray/cluster.yml -v --become --become-user=root", privileged: false
+          n.vm.provision "shell", inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/Kubernetes_env_ready.yaml", privileged: false
         end
       end
       private_count += 1
