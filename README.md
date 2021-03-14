@@ -2,8 +2,8 @@
 
 ## 소개
 
-Vagrant, Ansible, Kubespray를 사용하여<br/>
-쉽고 빠른 Docker+Kubernetes 개발, 학습 및 강의 환경 구축을 위해 설계된 IaC(Infra as Code) 도구<br/>
+쉽고 빠른 Docker+Kubernetes 개발, 학습 및 강의 환경 구축을 위해 설계된<br/>
+Vagrant, Ansible, Kubespray를 사용한 IaC(Infra as Code) 도구
 
 ## 사용 전 필요 조건
 
@@ -21,7 +21,7 @@ Vagrant, Ansible, Kubespray를 사용하여<br/>
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
 $ vagrant up
-$ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
+$ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // 기본 설정 $ vagrant ssh m1
 ```
 
 ## 참고 사항
@@ -39,7 +39,7 @@ alias k='kubectl'
 <span>1.</span> 프로비전이 실패한 경우 **vagrant provision** 명령어로 이를 다시 시도한다.
 
 <span>2.</span> **vagrant destroy --force && vagrant up** 와 같이 가상머신을 삭제하고 다시 생성할때,<br/>
-정상적으로 삭제된 것으로 보이지만 간혹 실제로는 삭제되지 않아서 실패하는 경우가 있으므로 버추얼 머신 환경설정의 가상머신 파일 저장 경로에서 이를 직접 확인해서 삭제 후 다시 시도한다.
+간혹 정상적으로 삭제된 것으로 보이지만 실제로는 삭제되지 않아서 실패하는 경우가 있으므로 버추얼 머신 환경설정의 가상머신 파일 저장 경로에서 이를 직접 확인해서 삭제 후 다시 시도한다.
 
 <hr/>
 
@@ -64,7 +64,7 @@ then configure the [cluster folder](cluster).
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
 $ vagrant up
-$ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}')
+$ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // By default, $ vagrant ssh m1
 ```
 
 ## Note
