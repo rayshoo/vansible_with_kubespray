@@ -34,6 +34,8 @@
         line: "{{ item }}"
       with_items:
         - "alias k='kubectl'"
+        - "source <(k completion bash)"
+        - "complete -F __start_kubectl k"
 
     - name: import the kubeadm apt-key (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
