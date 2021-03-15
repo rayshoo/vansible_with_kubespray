@@ -9,7 +9,10 @@
         regexp: 'PasswordAuthentication no'
         replace: 'PasswordAuthentication yes'
         backup: yes
+      register: result
+
     - name: sshd restart to apply "PasswordAuthentication"
       service:
         name: sshd
         state: restarted
+      changed_when: result.changed == true
