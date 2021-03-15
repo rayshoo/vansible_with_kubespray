@@ -106,9 +106,9 @@ it appears to have been deleted normally, but it is not actually deleted once at
 
 ## 라이센스, License
 
-[Apache License 2.0](LICENSE)
+### [Apache License 2.0](LICENSE)
 
-[Vim License](https://github.com/tpope/vim-pathogen/blob/master/LICENSE)
+### [Vim License](https://github.com/tpope/vim-pathogen/blob/master/LICENSE)
 
 <hr/>
  
