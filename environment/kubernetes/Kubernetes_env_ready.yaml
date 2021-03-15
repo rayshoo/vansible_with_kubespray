@@ -28,6 +28,20 @@
         path: "/etc/kubernetes/admin.conf"
         mode: 0600
 
+    - name: Install bash-completion (RHEL/CentOS)
+      when: ansible_os_family == "RedHat"
+      become: yes
+      yum:
+        name: bash-completion
+        state: present
+
+    - name: Install bash-completion (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      become: yes
+      apt:
+        name: bash-completion
+        state: present
+
     - name: Configure Bashrc
       lineinfile:
         dest: "{{ ansible_env.HOME }}/.bashrc"
