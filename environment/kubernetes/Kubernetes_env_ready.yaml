@@ -53,23 +53,27 @@
 
     - name: import the kubeadm apt-key (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
+      become: yes
       apt_key:
-        url: "{{ kubeadm_apt_key_url }}"
+        url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
         state: present
 
     - name : Create kubeadm source file (Debian/Ubuntu)
       when : ansible_os_family == "Debian"
+      become: yes
       copy: 
         dest: "/etc/apt/sources.list.d/kubernetes.list"
-        content: "{{ kubeadm_apt_repository }}"
+        content: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
 
     - name: Update apt packages (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
+      become: yes
       apt:
         update_cache: yes
     
     - name: Install kubeadm (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
+      become: yes
       apt:
         name: kubeadm
         state: present
