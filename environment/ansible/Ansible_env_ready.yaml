@@ -8,9 +8,9 @@
   tasks:
     - name: Add /etc/hosts
       become: yes
-      blockinfile: |
-        dest=/etc/hosts
-        content="{{ nodes }}"
+      blockinfile:
+        dest: /etc/hosts
+        content: "{{ nodes }}"
 
     - name: Install sshpass for Authentication (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
@@ -54,23 +54,129 @@
         name: "git"
         state: present
 
+    - name: Ensure .vim/{autoload,bundle} directory exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0750
+      loop:
+        - "{{ local_home }}/.vim/autoload"
+        - "{{ local_home }}/.vim/bundle"
+
+    - name: "Copy plug.vim file to {{ local_home }}/.vim/autoload"
+      copy:
+        src: custom/plug.vim
+        dest: "{{ local_home }}/.vim/autoload"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0664
+
     - name: Create files
       file:
         path: "{{ item }}"
         state: touch
         mode: 0644
+      register: touch_log
+      changed_when: touch_log.diff.before.state != "file"
       with_items:
         - "{{ local_home }}/.vimrc"
         - "{{ local_home }}/.bashrc"
 
-    - name: Configure vimrc
+    - name: Configure vimrc plugin
+      blockinfile: 
+        dest: "{{ local_home }}/.vimrc"
+        block: |
+          call plug#begin('~/.vim/plugged')
+          Plug 'pearofducks/ansible-vim'
+          call plug#end()
+        backup: yes
+        marker: "\" {mark} ANSIBLE MANAGED BLOCK"
+        insertbefore: BOF
+
+    - name: Install vim plugin
+      shell: "vim -E -c \"source ~/.vimrc\" -c PlugInstall -c qa"
+      register: vim_log
+      failed_when: "vim_log.stderr != \"\""
+
+    - name: Download "Copy pathogen.vim file from https://tpo.pe/pathogen11.vim (first attempt)"
+      get_url:
+        url: https://tpo.pe/pathogen11.vim
+        dest: "{{ local_home }}/.vim/autoload"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0664
+      ignore_errors: yes
+      register: pathogen_vim_download_log
+
+    - set_fact: pathogen_vim_download_log="{{ pathogen_vim_download_log }}"
+
+    - name: "Git clone pathogen.vim from forked remote repository (second attempt)"
+      when: "pathogen_vim_download_log.status_code != 200"
+      git:
+        repo: "https://github.com/rayshoo1234/vim-pathogen.git"
+        dest: "{{ local_home }}/environment/ansible/custom/vim-pathogen"
+      ignore_errors: yes
+      register: pathogen_final_attempt
+
+    - when: pathogen_vim_download_log.status_code != 200
+      shell: echo \"pathogen_vim_download_log.status_code != 200\"
+
+    - when: pathogen_vim_download_log.status_code == 200
+      shell: echo \"pathogen_vim_download_log.status_code == 200\"
+
+    - debug:
+        msg: "{{ pathogen_final_attempt }}"
+
+    - when: pathogen_final_attempt.failed == false
+      shell: echo \"pathogen_final_attempt.failed == false\"
+
+    - when: pathogen_final_attempt.failed == true
+      shell: echo \"pathogen_final_attempt.failed == true\"
+
+
+    - name: "Copy pathogen.vim file in {{ local_home }}/.vim/autoload"
+      when: "pathogen_vim_download_log.status_code == 200 or pathogen_final_attempt.failed != false"
+      copy:
+        src: "{{ local_home }}/environment/ansible/custom/vim-pathogen/autoload/pathogen.vim"
+        dest: "{{ local_home }}/.vim/autoload"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0664
+
+    - name: "Git clone vim-ansible-yaml from original repository (first attempt)"
+      git:
+        repo: "https://github.com/chase/vim-ansible-yaml.git"
+        dest: "{{ local_home }}/.vim/bundle/vim-ansible-yaml"
+      ignore_errors: yes
+      register: vim_ansible_yaml_log
+
+    - set_fact: vim_ansible_yaml_log="{{ vim_ansible_yaml_log }}"
+
+    - name: "Git clone vim-ansible-yaml from forked repository (second attempt)"
+      when: "vim_ansible_yaml_log.failed == true"
+      git:
+        repo: "https://github.com/rayshoo/vim-ansible-yaml.git"
+        dest: "{{ local_home }}/.vim/bundle/vim-ansible-yaml"
+      ignore_errors: yes
+
+    - name: Configure vimrc syntax
       lineinfile:
         dest: "{{ local_home }}/.vimrc"
         line: "{{ item }}"
+        insertafter: EOF
+        backup: yes
       with_items:
         - "set number"
         - "syntax on"
         - "autocmd FileType yaml setlocal ai ts=2 sw=2 et"
+
+    - name: Configure vimrc pathogen.vim
+      when: "pathogen_vim_download_log.status_code == 200 or pathogen_final_attempt.failed != false"
+      lineinfile:
+        dest: "{{ local_home }}/.vimrc"
+        line: "execute pathogen#infect()"
+        insertafter: EOF
+        backup: yes
 
     - name: Configure Bashrc
       lineinfile:
