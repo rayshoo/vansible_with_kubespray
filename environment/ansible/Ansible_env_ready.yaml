@@ -54,56 +54,14 @@
         name: "git"
         state: present
 
-    - name: Make directory .vim/autoload .vim/bundle
+    - name: Create files
       file:
         path: "{{ item }}"
-        state: directory
+        state: touch
+        mode: 0644
       with_items:
-        - "{{ local_home }}/.vim/autoload"
-        - "{{ local_home }}/.vim/bundle"
-
-    - name: Change permissions on .vim/autoload .vim/bundle
-      become: yes
-      file:
-        path: "{{ item }}"
-        owner: "{{ local_user }}"
-        group: "{{ local_user }}"
-      with_items:
-        - "{{ local_home }}/.vim/autoload"
-        - "{{ local_home }}/.vim/bundle"
-        - "{{ local_home }}/.vim"
-
-    - name: Copy pathogen.vim file to .vim/autoload
-      copy:
-        src: custom/pathogen.vim
-        dest: "{{ local_home }}/.vim/autoload/"
-        owner: "{{ local_user }}"
-        group: "{{ local_user }}"
-        mode: 0664
-
-    - name: Copy vim-ansible-yaml.tar.gz file to .vim/bundle
-      copy:
-        src: custom/vim-ansible-yaml-1.0.tar.gz
-        dest: "{{ local_home }}/.vim/bundle/"
-        owner: "{{ local_user }}"
-        group: "{{ local_user }}"
-        mode: 0664
-
-    - name: Unarchive vim-ansible-yaml.tar.gz
-      unarchive:
-        src: "{{ local_home }}/.vim/bundle/vim-ansible-yaml-1.0.tar.gz"
-        dest: "{{ local_home }}/.vim/bundle/"
-        owner: "{{ local_user }}"
-        group: "{{ local_user }}"
-        mode: 0755
-    
-    - name: Remove custom folder and vim-ansible-yaml.tar.gz
-      file:
-        path: "{{ item }}"
-        state: absent
-      with_items:
-        - "custom"
-        - "{{ local_home }}/.vim/bundle/vim-ansible-yaml-1.0.tar.gz"
+        - "{{ local_home }}/.vimrc"
+        - "{{ local_home }}/.bashrc"
 
     - name: Configure vimrc
       lineinfile:
@@ -111,7 +69,6 @@
         line: "{{ item }}"
       with_items:
         - "set number"
-        - "execute pathogen#infect()"
         - "syntax on"
         - "autocmd FileType yaml setlocal ai ts=2 sw=2 et"
 

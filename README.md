@@ -156,5 +156,3 @@ it appears to have been deleted normally, but it is not actually deleted once at
 
 [kairen/kubeadm-ansible](https://github.com/kairen/kubeadm-ansible)<br/>
 [kubernetes-sigs/kubespray](https://github.com/kubernetes-sigs/kubespray)<br/>
-[tpope/vim-pathogen](https://github.com/tpope/vim-pathogen)<br/>
-[chase/vim-ansible-yaml](https://github.com/chase/vim-ansible-yaml)

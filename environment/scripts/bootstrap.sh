@@ -19,6 +19,3 @@ case "${OS_NAME}" in
   *)
     echo "${OS_NAME} is not support ..."; exit 1
 esac
-mkdir -p /home/vagrant/.vim/autoload /home/vagrant/.vim/bundle
-touch /home/vagrant/.vimrc
-touch /home/vagrant/.bashrc
