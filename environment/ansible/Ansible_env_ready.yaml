@@ -8,9 +8,9 @@
   tasks:
     - name: Add /etc/hosts
       become: yes
-      blockinfile: |
-        dest=/etc/hosts
-        content="{{ nodes }}"
+      blockinfile:
+        dest: /etc/hosts
+        content: "{{ nodes }}"
 
     - name: Install sshpass for Authentication (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
@@ -54,21 +54,98 @@
         name: "git"
         state: present
 
+    - name: Ensure .vim/{autoload,bundle} directory exists
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: 0750
+      loop:
+        - "{{ local_home }}/.vim/autoload"
+        - "{{ local_home }}/.vim/bundle"
+
+    - name: "Copy plug.vim file to {{ local_home }}/.vim/autoload"
+      copy:
+        src: custom/plug.vim
+        dest: "{{ local_home }}/.vim/autoload"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0664
+
     - name: Create files
       file:
         path: "{{ item }}"
         state: touch
         mode: 0644
+      register: touch_log
+      changed_when: touch_log.diff.before.state != "file"
       with_items:
         - "{{ local_home }}/.vimrc"
         - "{{ local_home }}/.bashrc"
 
-    - name: Configure vimrc
+    - name: Configure vimrc plugin
+      blockinfile: 
+        dest: "{{ local_home }}/.vimrc"
+        block: |
+          call plug#begin('~/.vim/plugged')
+          Plug 'pearofducks/ansible-vim'
+          call plug#end()
+        backup: yes
+        marker: "\" {mark} ANSIBLE MANAGED BLOCK"
+        insertbefore: BOF
+
+    - name: Check vim plugin installed
+      stat:
+        path: "{{ local_home }}/.vim/plugged/ansible-vim"
+      register: file_check
+
+    - name: Install vim plugin
+      shell: "vim -E -s -c \"source ~/.vimrc\" -c PlugInstall -c qa"
+      register: vim_log
+      failed_when: "vim_log.stderr != \"\""
+      changed_when: file_check.stat.exists == false
+
+    - name: Download "Copy pathogen.vim file from https://tpo.pe/pathogen.vim (first attempt)"
+      get_url:
+        url: https://tpo.pe/pathogen.vim
+        dest: "{{ local_home }}/.vim/autoload"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0664
+      ignore_errors: yes
+      register: pathogen_vim_download_log
+
+    - name: "Git clone pathogen.vim from forked remote repository (second attempt)"
+      when: "pathogen_vim_download_log.status_code != 200"
+      git:
+        repo: "https://github.com/rayshoo/vim-pathogen.git"
+        dest: "{{ local_home }}/environment/ansible/custom/vim-pathogen"
+
+    - name: "Copy pathogen.vim file in {{ local_home }}/.vim/autoload"
+      when: "pathogen_vim_download_log.status_code != 200"
+      copy:
+        src: "{{ local_home }}/environment/ansible/custom/vim-pathogen/autoload/pathogen.vim"
+        dest: "{{ local_home }}/.vim/autoload"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0664
+
+    - name: Unarchive vim-ansible-yaml.tar
+      unarchive:
+        src: "{{ local_home }}/environment/ansible/custom/vim-ansible-yaml.tar"
+        dest: "{{ local_home }}/.vim/bundle/"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0775
+
+    - name: Configure vimrc syntax
       lineinfile:
         dest: "{{ local_home }}/.vimrc"
         line: "{{ item }}"
+        insertafter: EOF
+        backup: yes
       with_items:
         - "set number"
+        - "execute pathogen#infect()"
         - "syntax on"
         - "autocmd FileType yaml setlocal ai ts=2 sw=2 et"
 
