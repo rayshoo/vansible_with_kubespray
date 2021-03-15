@@ -93,14 +93,20 @@
         marker: "\" {mark} ANSIBLE MANAGED BLOCK"
         insertbefore: BOF
 
+    - name: Check vim plugin installed
+      stat:
+        path: "{{ local_home }}/.vim/plugged/ansible-vim"
+      register: file_check
+
     - name: Install vim plugin
-      shell: "vim -E -c \"source ~/.vimrc\" -c PlugInstall -c qa"
+      shell: "vim -E -s -c \"source ~/.vimrc\" -c PlugInstall -c qa"
       register: vim_log
       failed_when: "vim_log.stderr != \"\""
+      changed_when: file_check.stat.exists == false
 
-    - name: Download "Copy pathogen.vim file from https://tpo.pe/pathogen11.vim (first attempt)"
+    - name: Download "Copy pathogen.vim file from https://tpo.pe/pathogen.vim (first attempt)"
       get_url:
-        url: https://tpo.pe/pathogen11.vim
+        url: https://tpo.pe/pathogen.vim
         dest: "{{ local_home }}/.vim/autoload"
         owner: "{{ local_user }}"
         group: "{{ local_user }}"
@@ -108,34 +114,14 @@
       ignore_errors: yes
       register: pathogen_vim_download_log
 
-    - set_fact: pathogen_vim_download_log="{{ pathogen_vim_download_log }}"
-
     - name: "Git clone pathogen.vim from forked remote repository (second attempt)"
       when: "pathogen_vim_download_log.status_code != 200"
       git:
-        repo: "https://github.com/rayshoo1234/vim-pathogen.git"
+        repo: "https://github.com/rayshoo/vim-pathogen.git"
         dest: "{{ local_home }}/environment/ansible/custom/vim-pathogen"
-      ignore_errors: yes
-      register: pathogen_final_attempt
-
-    - when: pathogen_vim_download_log.status_code != 200
-      shell: echo \"pathogen_vim_download_log.status_code != 200\"
-
-    - when: pathogen_vim_download_log.status_code == 200
-      shell: echo \"pathogen_vim_download_log.status_code == 200\"
-
-    - debug:
-        msg: "{{ pathogen_final_attempt }}"
-
-    - when: pathogen_final_attempt.failed == false
-      shell: echo \"pathogen_final_attempt.failed == false\"
-
-    - when: pathogen_final_attempt.failed == true
-      shell: echo \"pathogen_final_attempt.failed == true\"
-
 
     - name: "Copy pathogen.vim file in {{ local_home }}/.vim/autoload"
-      when: "pathogen_vim_download_log.status_code == 200 or pathogen_final_attempt.failed != false"
+      when: "pathogen_vim_download_log.status_code != 200"
       copy:
         src: "{{ local_home }}/environment/ansible/custom/vim-pathogen/autoload/pathogen.vim"
         dest: "{{ local_home }}/.vim/autoload"
@@ -143,21 +129,13 @@
         group: "{{ local_user }}"
         mode: 0664
 
-    - name: "Git clone vim-ansible-yaml from original repository (first attempt)"
-      git:
-        repo: "https://github.com/chase/vim-ansible-yaml.git"
-        dest: "{{ local_home }}/.vim/bundle/vim-ansible-yaml"
-      ignore_errors: yes
-      register: vim_ansible_yaml_log
-
-    - set_fact: vim_ansible_yaml_log="{{ vim_ansible_yaml_log }}"
-
-    - name: "Git clone vim-ansible-yaml from forked repository (second attempt)"
-      when: "vim_ansible_yaml_log.failed == true"
-      git:
-        repo: "https://github.com/rayshoo/vim-ansible-yaml.git"
-        dest: "{{ local_home }}/.vim/bundle/vim-ansible-yaml"
-      ignore_errors: yes
+    - name: Unarchive vim-ansible-yaml.tar
+      unarchive:
+        src: "{{ local_home }}/environment/ansible/custom/vim-ansible-yaml.tar"
+        dest: "{{ local_home }}/.vim/bundle/"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0775
 
     - name: Configure vimrc syntax
       lineinfile:
@@ -167,16 +145,9 @@
         backup: yes
       with_items:
         - "set number"
+        - "execute pathogen#infect()"
         - "syntax on"
         - "autocmd FileType yaml setlocal ai ts=2 sw=2 et"
-
-    - name: Configure vimrc pathogen.vim
-      when: "pathogen_vim_download_log.status_code == 200 or pathogen_final_attempt.failed != false"
-      lineinfile:
-        dest: "{{ local_home }}/.vimrc"
-        line: "execute pathogen#infect()"
-        insertafter: EOF
-        backup: yes
 
     - name: Configure Bashrc
       lineinfile:
