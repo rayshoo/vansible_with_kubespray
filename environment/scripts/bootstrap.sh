@@ -11,9 +11,10 @@ case "${OS_NAME}" in
     sudo yum install -y ansible
   ;;
   "Ubuntu")
+    sudo apt-add-repository --yes --update ppa:ansible/ansible
     sudo apt update
-    sudo apt install -y python3-pip
-    sudo pip3 install ansible
+    sudo apt install -y software-properties-common
+    sudo apt install -y ansible
   ;;
   *)
     echo "${OS_NAME} is not support ..."; exit 1
