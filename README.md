@@ -13,7 +13,7 @@ Vagrant, Ansible, Kubespray를 사용한 IaC(Infra as Code) 도구
 
 <span>1.</span> [.env](.env) 파일을 구성한다.
 
-<span>2.</span> kubespray를 수동으로 구성하고 싶다면, [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L38)으로 옵션을 설정하고,
+<span>2.</span> kubespray를 수동으로 구성하고 싶다면, [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L43)으로 옵션을 설정하고,
 [cluster folder](cluster) 를 목적에 맞게 구성한다.
 
 <span>3.</span> [Vagrantfile](Vagrantfile)이 위치한 경로에서 하단의 명령어를 bash 쉘에 입력한다.
@@ -56,7 +56,7 @@ with using Vagrant, Ansible, Kubespray.
 
 <span>1.</span> Configure the [.env](.env) file.
 
-<span>2.</span> If you want to configure kubespray with manually, set [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L38)
+<span>2.</span> If you want to configure kubespray with manually, set [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L43)
 then configure the [cluster folder](cluster).
 
 <span>3.</span> Type the following command into the bash shell in the path where the [Vagrantfile](Vagrantfile) is located.
@@ -86,6 +86,14 @@ it appears to have been deleted normally, but it is not actually deleted once at
 
 <hr/>
 
+## 라이센스, License
+
+### [Apache License 2.0](LICENSE)
+
+### [Vim License](https://github.com/tpope/vim-pathogen/blob/master/LICENSE)
+
+<hr/>
+
 ## 개인 문서, Private Documents
 
 ### [https://github.com/rayshoo/vansible_with_kubespray/wiki](https://github.com/rayshoo/vansible_with_kubespray/wiki)
@@ -101,14 +109,6 @@ it appears to have been deleted normally, but it is not actually deleted once at
 ### [Docker](https://docs.docker.com/)
 
 ### [Kubernetes](https://kubernetes.io/ko/docs/home/)
-
-<hr/>
-
-## 라이센스, License
-
-### [Apache License 2.0](LICENSE)
-
-### [Vim License](https://github.com/tpope/vim-pathogen/blob/master/LICENSE)
 
 <hr/>
  
