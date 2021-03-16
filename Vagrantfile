@@ -121,9 +121,9 @@ def set_vbox(vb, config, os_image)
   when :centos7
     config.vm.box = "bento/centos-7.8"
   when :ubuntu18
-    config.vm.box = "generic/ubuntu1804"
+    config.vm.box = "bento/ubuntu-18.04"
   when :ubuntu20
-    config.vm.box = "generic/ubuntu2004"
+    config.vm.box = "ubuntu/focal64"
   else
     config.vm.box = os_image.to_s
   end
