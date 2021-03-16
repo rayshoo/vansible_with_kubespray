@@ -70,8 +70,8 @@ Vagrant.configure("2") do |config|
           write_file(ssh_auth_text, "environment/scripts/add_ssh_auth.sh")
           n.vm.provision "file", source: "environment/ansible", destination: "~/environment/ansible"
           n.vm.provision "shell", path: "environment/scripts/bootstrap.sh"
-          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_env_ready.yaml", privileged: false
-          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/Ansible_ssh_conf.yaml"
+          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/ansible_env.yaml", privileged: false
+          n.vm.provision "shell", inline: "ansible-playbook environment/ansible/ansible_ssh.yaml"
           n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
         end
       end
@@ -93,7 +93,7 @@ Vagrant.configure("2") do |config|
           n.vm.provision "file", source: "environment/kubernetes", destination: "~/environment/kubernetes"
           n.vm.provision "file", source: "environment/ansible/ansible.cfg", destination: "~/environment/kubernetes/"
           n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
-          n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/Kubespray_env_ready.yaml", privileged: false
+          n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/kubespray_env.yaml", privileged: false
           n.vm.provision "shell", path: "environment/scripts/ssh_copy_id.sh", privileged: false
           if cluster_structure
             master_text += "\n#{name}#{id}"
@@ -105,7 +105,7 @@ Vagrant.configure("2") do |config|
             n.vm.provision "file", source: "cluster/group_vars", destination: "environment/kubernetes/kubespray/group_vars"
           end
           n.vm.provision "shell", inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubespray/cluster.yml -v --become --become-user=root", privileged: false
-          n.vm.provision "shell", inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/Kubernetes_env_ready.yaml", privileged: false
+          n.vm.provision "shell", inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubernetes_env.yaml", privileged: false
         end
       end
       private_count += 1
@@ -121,9 +121,9 @@ def set_vbox(vb, config, os_image)
   when :centos7
     config.vm.box = "bento/centos-7.8"
   when :ubuntu18
-    config.vm.box = "bento/ubuntu-18.04"
+    config.vm.box = "generic/ubuntu1804"
   when :ubuntu20
-    config.vm.box = "ubuntu/focal64"
+    config.vm.box = "generic/ubuntu2004"
   else
     config.vm.box = os_image.to_s
   end
