@@ -17,23 +17,40 @@ Vagrant.configure("2") do |config|
   min_host_port = (ENV['MIN_HOST_PORT'] || 19210).to_i
   max_host_port = min_host_port + total_node - 1
 
+  ansible_provision = convert_string_to_boolean(ENV['ANSIBLE_PROVISION'] || false)
+  docker_provision = convert_string_to_boolean(ENV['DOCKER_PROVISION'] || false)
+  k8s_provision = convert_string_to_boolean(ENV['KUBERNETES_PROVISION'] || false)
+  cluster_structure = convert_string_to_boolean(ENV['CLUSTER_STRUCTURE_AUTO_CREATE'] || false)
+
   host_file_text = "nodes: \""
   ansible_host_file_text = ""
   inventory_text = "[all]"
   master_text = ""
   worker_text = ""
-  
   ssh_auth_text = "#!/bin/bash"
   ssh_copy_text = "#!/bin/bash\nif [ ! -f \".ssh/id_rsa\" ]; then\n  yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"\nelse\n  echo \"id_rsa file already exists. Skip ssh-keygen...\"\nfi\n"
-  
-  private_count = 0
-  
-  ansible_provision = convert_string_to_boolean(ENV['ANSIBLE_PROVISION'] || false)
-  k8s_provision = convert_string_to_boolean(ENV['KUBERNETES_PROVISION'] || false)
-  cluster_structure = convert_string_to_boolean(ENV['CLUSTER_STRUCTURE_AUTO_CREATE'] || false)
+  path = "spec/template"
+  spec_text = read_file("#{path}/default.rb")
+  if ansible_provision
+    spec_text += "\n" + read_file("#{path}/ansible.rb")
+  end
+  if docker_provision
+    spec_text += "\n" + read_file("#{path}/docker.rb")
+  end
+  if k8s_provision
+    spec_text += "\n" + read_file("#{path}/kubernetes.rb")
+  end
+  Dir.foreach("spec") do | entry |
+    puts entry
+    if (entry != "." && entry != ".." && entry != "template" && entry != "spec_helper.rb" && entry != "spec.tar.gz")
+      puts "folder found"
+    end
+  end
   
   master_group = ENV['MASTER_NODE_ANSIBLE_GROUP_NAME'] || "master"
   worker_group = ENV['WORKER_NODE_ANSIBLE_GROUP_NAME'] || "worker"
+
+  private_count = 0
 
   (1..(master + worker)).each do |machine|
     name = (machine <= worker) ? "#{worker_node_name}" : "#{master_node_name}"
@@ -74,6 +91,10 @@ Vagrant.configure("2") do |config|
           n.vm.provision "shell", inline: "ansible-playbook environment/ansible/ansible_ssh.yaml"
           n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
         end
+      end
+      if docker_provision
+        n.vm.provision "file", source: "environment/docker", destination: "~/environment/docker"
+        n.vm.provision "shell", inline: "ansible-playbook environment/docker/docker_env.yaml"
       end
       if k8s_provision
         ssh_copy_text += "\ncat /home/vagrant/.ssh/id_rsa.pub | sshpass -p vagrant ssh -o StrictHostKeyChecking=no vagrant@#{ip_addr} \"sudo tee -a /home/vagrant/.ssh/authorized_keys\""
