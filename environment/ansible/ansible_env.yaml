@@ -63,9 +63,14 @@
         - "{{ local_home }}/.vim/autoload"
         - "{{ local_home }}/.vim/bundle"
 
-    - name: "Copy plug.vim file to {{ local_home }}/.vim/autoload"
+    - name: "Git clone vim-plug from remote repository"
+      git:
+        repo: "https://github.com/junegunn/vim-plug.git"
+        dest: "{{ local_home }}/environment/ansible/custom/vim-plug"
+
+    - name: "Copy plug.vim file in {{ local_home }}/.vim/autoload"
       copy:
-        src: custom/plug.vim
+        src: "{{ local_home }}/environment/ansible/custom/vim-plug/plug.vim"
         dest: "{{ local_home }}/.vim/autoload"
         owner: "{{ local_user }}"
         group: "{{ local_user }}"
@@ -104,24 +109,12 @@
       failed_when: "vim_log.stderr != \"\""
       changed_when: file_check.stat.exists == false
 
-    - name: Download "Copy pathogen.vim file from https://tpo.pe/pathogen.vim (first attempt)"
-      get_url:
-        url: https://tpo.pe/pathogen.vim
-        dest: "{{ local_home }}/.vim/autoload"
-        owner: "{{ local_user }}"
-        group: "{{ local_user }}"
-        mode: 0664
-      ignore_errors: yes
-      register: pathogen_vim_download_log
-
-    - name: "Git clone pathogen.vim from forked remote repository (second attempt)"
-      when: "pathogen_vim_download_log.status_code != 200"
+    - name: "Git clone pathogen.vim from remote repository"
       git:
-        repo: "https://github.com/rayshoo/vim-pathogen.git"
+        repo: "https://github.com/tpope/vim-pathogen.git"
         dest: "{{ local_home }}/environment/ansible/custom/vim-pathogen"
 
     - name: "Copy pathogen.vim file in {{ local_home }}/.vim/autoload"
-      when: "pathogen_vim_download_log.status_code != 200"
       copy:
         src: "{{ local_home }}/environment/ansible/custom/vim-pathogen/autoload/pathogen.vim"
         dest: "{{ local_home }}/.vim/autoload"
