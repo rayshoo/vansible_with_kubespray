@@ -14,7 +14,6 @@ end
 describe package('kubeadm') do
   it { should be_installed }
 end
-
 describe service('kubelet') do
   it { should be_enabled }
   it { should be_running }
