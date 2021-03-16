@@ -1,5 +1,7 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
+require 'fileutils'
+
 Vagrant.configure("2") do |config|
   config.vm.provider "virtualbox"
   config.vm.synced_folder ".", "/vagrant", disabled: true
@@ -30,20 +32,27 @@ Vagrant.configure("2") do |config|
   ssh_auth_text = "#!/bin/bash"
   ssh_copy_text = "#!/bin/bash\nif [ ! -f \".ssh/id_rsa\" ]; then\n  yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"\nelse\n  echo \"id_rsa file already exists. Skip ssh-keygen...\"\nfi\n"
   path = "spec/template"
-  spec_text = read_file("#{path}/default.rb")
+  spec_prefix_text = read_file("#{path}/default.rb")
+  control_node_spec_text = spec_prefix_text
+  master_node_spec_text = spec_prefix_text
+  worker_node_sepc_text = spec_prefix_text
+
   if ansible_provision
-    spec_text += "\n" + read_file("#{path}/ansible.rb")
+    control_node_spec_text += "\n\n" + read_file("#{path}/ansible.rb")
   end
   if docker_provision
-    spec_text += "\n" + read_file("#{path}/docker.rb")
+    control_node_spec_text += "\n\n" + read_file("#{path}/docker.rb")
+    if k8s_provision
+      master_node_spec_text += "\n\n" + read_file("#{path}/docker.rb")
+    end
   end
   if k8s_provision
-    spec_text += "\n" + read_file("#{path}/kubernetes.rb")
+    control_node_spec_text += "\n\n" + read_file("#{path}/kubernetes.rb")
+    master_node_spec_text += "\n\n" + read_file("#{path}/kubernetes.rb")
   end
   Dir.foreach("spec") do | entry |
-    puts entry
-    if (entry != "." && entry != ".." && entry != "template" && entry != "spec_helper.rb" && entry != "spec.tar.gz")
-      puts "folder found"
+    if (entry != "." && entry != ".." && entry != "template" && entry != "spec_helper.rb" && entry != "spec.tar.gz" && entry != "spec.env.yaml")
+      FileUtils.remove_dir("spec/#{entry}")
     end
   end
   
@@ -69,6 +78,15 @@ Vagrant.configure("2") do |config|
         vb.cpus = (machine <= worker) ? 1 : 2
       end
       n.vm.boot_timeout = 600
+      
+      Dir.mkdir("spec/#{name}#{id}")
+      if (machine <= worker)
+        write_file(worker_node_sepc_text, "spec/#{name}#{id}/check_spec.rb")
+      elsif (machine == master + worker)
+        write_file(control_node_spec_text, "spec/#{name}#{id}/check_spec.rb")
+      else
+        write_file(master_node_spec_text, "spec/#{name}#{id}/check_spec.rb")
+      end
       
       if ansible_provision
         host_file_text += (machine == 1) ? "#{ip_addr} #{name}#{id}" : "\\n#{ip_addr} #{name}#{id}"
