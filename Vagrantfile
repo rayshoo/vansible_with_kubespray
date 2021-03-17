@@ -25,6 +25,7 @@ Vagrant.configure("2") do |config|
   k8s_provision = convert_string_to_boolean(ENV['KUBERNETES_PROVISION'] || false)
   cluster_structure = convert_string_to_boolean(ENV['CLUSTER_STRUCTURE_AUTO_CREATE'] || false)
   spec_file = convert_string_to_boolean(ENV['SERVERSPEC_FILEUTIL_ENABLE'] || false)
+  spec_test = convert_string_to_boolean(ENV['SERVERSPEC_TEST'] || false)
   spec_provision = convert_string_to_boolean(ENV['SERVERSPEC_PROVISION'] || false)
 
   host_file_text = "nodes: \""
@@ -32,8 +33,8 @@ Vagrant.configure("2") do |config|
   inventory_text = "[all]"
   master_text = ""
   worker_text = ""
-  ssh_auth_text = "#!/bin/bash\nif [ ! -f \".ssh/id_rsa\" ]; then\n  yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"\nelse\n  echo \"id_rsa file already exists. Skip ssh-keygen...\"\nfi\n"
-  path = "template"
+  ssh_auth_text = "#!/bin/bash\nif [ ! -f \"/home/vagrant/.ssh/id_rsa\" ]; then\n  yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"\nelse\n  echo \"id_rsa file already exists. Skip ssh-keygen...\"\nfi\n"
+  path = "templates"
   spec_prefix_text = read_file("#{path}/default.rb")
   control_node_spec_text = spec_prefix_text
   master_node_spec_text = spec_prefix_text
@@ -122,10 +123,12 @@ Vagrant.configure("2") do |config|
           write_file(ansible_host_file_text, "environment/ansible/hosts.ini")
           write_file(ssh_auth_text, "environment/scripts/add_ssh_auth.sh")
           n.vm.provision "file", source: "environment/ansible", destination: "~/environment/ansible"
+          n.vm.provision "file", source: "environment/scripts/add_ssh_auth.sh", destination: "~/environment/ansible/"
           n.vm.provision "shell", path: "environment/scripts/bootstrap.sh"
           n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook environment/ansible/ansible_env.yaml", privileged: false
           n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook environment/ansible/ansible_ssh.yaml"
           n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
+          n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook -i ~/hosts.ini environment/ansible/custom/motd.yaml", privileged: false
         end
       end
       if k8s_provision
@@ -169,8 +172,12 @@ Vagrant.configure("2") do |config|
           n.vm.provision "file", source: "spec", destination: "~/environment/spec"
           n.vm.provision "file", source: "Rakefile", destination: "~/environment/"
           n.vm.provision "file", source: ".rspec", destination: "~/environment/"
-          n.vm.provision "file", source: "template/spec_helper.rb", destination: "~/environment/spec/spec_helper.rb"
+          n.vm.provision "file", source: "templates/spec_helper.rb", destination: "~/environment/spec/spec_helper.rb"
           n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook environment/spec/spec_env.yaml", privileged: false
+        end
+      end
+      if spec_test
+        if machine == (master + worker)
           n.vm.provision "shell", keep_color: true, inline: "cd environment/ && rake spec", privileged: false
         end
       end
@@ -314,4 +321,3 @@ when 6
   ⠻⣿⣦⣉⣵⣿⠟⠀
   ⠀⠈⠛⠛⠛⠁"
 end
-puts "\nVansible with Kubespray\n- github.com/rayshoo/vansible_with_kubespray"

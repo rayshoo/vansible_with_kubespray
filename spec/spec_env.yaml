@@ -19,9 +19,6 @@
       yum:
         name: "{{ ansible_env.HOME }}/ruby-2.7.2-1.el7.centos.x86_64.rpm"
         state: present
-    
-    - debug:
-        msg: "{{ ansible_distribution_major_version }}"
 
     - name: Install ruby (RHEL/CentOS8~)
       when: ansible_os_family == 'RedHat' and ansible_distribution_major_version > '7'
@@ -30,21 +27,23 @@
         name: ruby
         state: present
 
-    - name: Install ruby (Debian/Ubuntu)
-      when: ansible_os_family == "Debian"
-      become: yes
-      apt:
-        name: ruby
-        state: present
-
-    - name: Install rake
+    - name: Install rake (RHEL/CentOS)
+      when: ansible_os_family == 'RedHat'
       gem:
         name: rake
         state: latest
         user_install: yes
 
-    - name: Install serverspec
+    - name: Install serverspec (RHEL/CentOS)
+      when: ansible_os_family == 'RedHat'
       gem:
         name: serverspec
         state: latest
         user_install: yes
+
+    - name: Install ruby-serverspec (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      become: yes
+      apt:
+        name: ruby-serverspec
+        state: present
