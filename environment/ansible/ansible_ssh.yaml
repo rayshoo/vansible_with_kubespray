@@ -4,6 +4,7 @@
   gather_facts: no
   tasks:
     - name: PasswordAuthentication change from no to yes
+      become: yes
       replace:
         dest: /etc/ssh/sshd_config
         regexp: 'PasswordAuthentication no'
@@ -12,6 +13,7 @@
       register: result
 
     - name: sshd restart to apply "PasswordAuthentication"
+      become: yes
       service:
         name: sshd
         state: restarted

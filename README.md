@@ -13,14 +13,14 @@ Vagrant, Ansible, Kubespray를 사용한 IaC(Infra as Code) 도구
 
 <span>1.</span> [.env](.env) 파일을 구성한다.
 
-<span>2.</span> kubespray를 수동으로 구성하고 싶다면, [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L43)으로 옵션을 설정하고,
+<span>2.</span> kubespray를 수동으로 구성하고 싶다면, [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L34)으로 옵션을 설정하고,
 [cluster folder](cluster) 를 목적에 맞게 구성한다.
 
 <span>3.</span> [Vagrantfile](Vagrantfile)이 위치한 경로에서 하단의 명령어를 bash 쉘에 입력한다.
 
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
-$ vagrant up
+$ vagrant up --color
 $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // 기본 설정 $ vagrant ssh m1
 ```
 
@@ -56,14 +56,14 @@ with using Vagrant, Ansible, Kubespray.
 
 <span>1.</span> Configure the [.env](.env) file.
 
-<span>2.</span> If you want to configure kubespray with manually, set [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L43)
+<span>2.</span> If you want to configure kubespray with manually, set [CLUSTER_STRUCTURE_AUTO_CREATE=no](.env#L34)
 then configure the [cluster folder](cluster).
 
 <span>3.</span> Type the following command into the bash shell in the path where the [Vagrantfile](Vagrantfile) is located.
 
 ```sh
 $ vagrant plugin install vagrant-env vagrant-vbguest
-$ vagrant up
+$ vagrant up --color
 $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // By default, $ vagrant ssh m1
 ```
 
@@ -167,4 +167,5 @@ it appears to have been deleted normally, but it is not actually deleted once at
 [junegunn/vim-plug](https://github.com/junegunn/vim-plug)<br/>
 [pearofducks/ansible-vim](https://github.com/pearofducks/ansible-vim)<br/>
 [tpope/vim-pathogen](https://github.com/tpope/vim-pathogen)<br/>
-[chase/vim-ansible-yaml](https://github.com/chase/vim-ansible-yaml)
+[chase/vim-ansible-yaml](https://github.com/chase/vim-ansible-yaml)<br/>
+[telus/ansible-motd](https://github.com/telus/ansible-motd)

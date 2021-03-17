@@ -1,0 +1,6 @@
+---
+galaxy_info:
+  author: "Brian Choi"
+  company: "winesoft"
+  description: "Vansible with Kubespray motd"
+  license: Apache-2.0
