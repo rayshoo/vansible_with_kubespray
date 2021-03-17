@@ -23,6 +23,8 @@ Vagrant.configure("2") do |config|
   docker_provision = convert_string_to_boolean(ENV['DOCKER_PROVISION'] || false)
   k8s_provision = convert_string_to_boolean(ENV['KUBERNETES_PROVISION'] || false)
   cluster_structure = convert_string_to_boolean(ENV['CLUSTER_STRUCTURE_AUTO_CREATE'] || false)
+  spec_enable = convert_string_to_boolean(ENV['SERVERSPEC_ENABLE'] || false)
+  spec_provision = convert_string_to_boolean(ENV['SERVERSPEC_PROVISION'] || false)
 
   host_file_text = "nodes: \""
   ansible_host_file_text = ""
@@ -31,28 +33,30 @@ Vagrant.configure("2") do |config|
   worker_text = ""
   ssh_auth_text = "#!/bin/bash"
   ssh_copy_text = "#!/bin/bash\nif [ ! -f \".ssh/id_rsa\" ]; then\n  yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"\nelse\n  echo \"id_rsa file already exists. Skip ssh-keygen...\"\nfi\n"
-  path = "spec/template"
+  path = "template"
   spec_prefix_text = read_file("#{path}/default.rb")
   control_node_spec_text = spec_prefix_text
   master_node_spec_text = spec_prefix_text
   worker_node_sepc_text = spec_prefix_text
 
-  if ansible_provision
-    control_node_spec_text += "\n\n" + read_file("#{path}/ansible.rb")
-  end
-  if docker_provision
-    control_node_spec_text += "\n\n" + read_file("#{path}/docker.rb")
-    if k8s_provision
-      master_node_spec_text += "\n\n" + read_file("#{path}/docker.rb")
+  if spec_enable
+    if ansible_provision
+      control_node_spec_text += "\n\n" + read_file("#{path}/ansible.rb")
     end
-  end
-  if k8s_provision
-    control_node_spec_text += "\n\n" + read_file("#{path}/kubernetes.rb")
-    master_node_spec_text += "\n\n" + read_file("#{path}/kubernetes.rb")
-  end
-  Dir.foreach("spec") do | entry |
-    if (entry != "." && entry != ".." && entry != "template" && entry != "spec_helper.rb" && entry != "spec.tar.gz" && entry != "spec.env.yaml")
-      FileUtils.remove_dir("spec/#{entry}")
+    if docker_provision
+      control_node_spec_text += "\n\n" + read_file("#{path}/docker.rb")
+      if k8s_provision
+        master_node_spec_text += "\n\n" + read_file("#{path}/docker.rb")
+      end
+    end
+    if k8s_provision
+      control_node_spec_text += "\n\n" + read_file("#{path}/kubernetes.rb")
+      master_node_spec_text += "\n\n" + read_file("#{path}/kubernetes.rb")
+    end
+    Dir.foreach("spec") do | entry |
+      if (entry != "." && entry != ".." && entry != "spec_helper.rb" && entry != "spec.tar.gz" && entry != "spec.env.yaml")
+        FileUtils.remove_dir("spec/#{entry}")
+      end
     end
   end
   
@@ -78,14 +82,16 @@ Vagrant.configure("2") do |config|
         vb.cpus = (machine <= worker) ? 1 : 2
       end
       n.vm.boot_timeout = 600
-      
-      Dir.mkdir("spec/#{name}#{id}")
-      if (machine <= worker)
-        write_file(worker_node_sepc_text, "spec/#{name}#{id}/check_spec.rb")
-      elsif (machine == master + worker)
-        write_file(control_node_spec_text, "spec/#{name}#{id}/check_spec.rb")
-      else
-        write_file(master_node_spec_text, "spec/#{name}#{id}/check_spec.rb")
+
+      if spec_enable
+        Dir.mkdir("spec/#{name}#{id}")
+        if (machine <= worker)
+          write_file(worker_node_sepc_text, "spec/#{name}#{id}/check_spec.rb")
+        elsif (machine == master + worker)
+          write_file(control_node_spec_text, "spec/#{name}#{id}/check_spec.rb")
+        else
+          write_file(master_node_spec_text, "spec/#{name}#{id}/check_spec.rb")
+        end
       end
       
       if ansible_provision
@@ -110,10 +116,6 @@ Vagrant.configure("2") do |config|
           n.vm.provision "shell", path: "environment/scripts/add_ssh_auth.sh", privileged: false
         end
       end
-      if docker_provision
-        n.vm.provision "file", source: "environment/docker", destination: "~/environment/docker"
-        n.vm.provision "shell", inline: "ansible-playbook environment/docker/docker_env.yaml"
-      end
       if k8s_provision
         ssh_copy_text += "\ncat /home/vagrant/.ssh/id_rsa.pub | sshpass -p vagrant ssh -o StrictHostKeyChecking=no vagrant@#{ip_addr} \"sudo tee -a /home/vagrant/.ssh/authorized_keys\""
         
@@ -132,8 +134,8 @@ Vagrant.configure("2") do |config|
           n.vm.provision "file", source: "environment/kubernetes", destination: "~/environment/kubernetes"
           n.vm.provision "file", source: "environment/ansible/ansible.cfg", destination: "~/environment/kubernetes/"
           n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
-          n.vm.provision "shell", inline: "ansible-playbook environment/kubernetes/kubespray_env.yaml", privileged: false
-          n.vm.provision "shell", path: "environment/scripts/ssh_copy_id.sh", privileged: false
+          n.vm.provision "shell", keep_color: true, inline: "ansible-playbook environment/kubernetes/kubespray_env.yaml", privileged: false
+          n.vm.provision "shell", keep_color: true, path: "environment/scripts/ssh_copy_id.sh", privileged: false
           if cluster_structure
             master_text += "\n#{name}#{id}"
             inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr} etcd_member_name=etcd#{id}"
@@ -143,8 +145,22 @@ Vagrant.configure("2") do |config|
             n.vm.provision "file", source: "cluster/inventory.ini", destination: "environment/kubernetes/inventory.ini"
             n.vm.provision "file", source: "cluster/group_vars", destination: "environment/kubernetes/kubespray/group_vars"
           end
-          n.vm.provision "shell", inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubespray/cluster.yml -v --become --become-user=root", privileged: false
-          n.vm.provision "shell", inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubernetes_env.yaml", privileged: false
+          n.vm.provision "shell", keep_color: true, inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubespray/cluster.yml -v --become --become-user=root", privileged: false
+          n.vm.provision "shell", keep_color: true, inline: "ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubernetes_env.yaml", privileged: false
+        end
+      end
+      if docker_provision
+        if machine == (master + worker)
+          n.vm.provision "file", source: "environment/docker", destination: "~/environment/docker"
+          n.vm.provision "shell", keep_color: true, inline: "ansible-playbook environment/docker/docker_env.yaml"
+        end
+      end
+      if (spec_enable == true && spec_provision == true)
+        if machine == (master + worker)
+          n.vm.provision "file", source: "spec", destination: "~/environment/spec"
+          n.vm.provision "file", source: "template/spec_helper.rb", destination: "~/environment/spec/spec_helper.rb"
+          n.vm.provision "shell", keep_color: true, inline: "ansible-playbook environment/spec/spec_env.yaml", privileged: false
+          n.vm.provision "shell", keep_color: true, inline: "cd environment/spec/spec_env.yaml && rake spec"
         end
       end
       private_count += 1
@@ -185,7 +201,7 @@ def write_file(text, name)
   aFile.syswrite(text)
 end
 
-case Random.new.rand(1..5)
+case Random.new.rand(1..6)
 when 1
   puts "⠀⠀⠀⠀⠀  ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣷⠆
 ⣶⣤⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴
@@ -278,5 +294,13 @@ when 5
   ⢸⣷⣾⠃⢸⣿⢸⣿⠀⣿⠋⢻⡇⣼⣏⣹⣧⢸⣿⠙⢸⣿⠙⣿⢀⣿⣋⣿⡆⣿⡏⠁⣼⣏⣹⣧⢸⣯⣉
   ⢸⡏⢻⣦⠸⣿⣼⣿⠀⣿⣤⣾⠇⠹⣯⣭⡅⢸⣿⠀⢸⣿⠀⣿⠈⢿⣭⣭⡁⢻⣧⣄⢻⣯⣭⡅⢠⣬⣿⠇
   ⠀⠀⠀⠀⠀⠈⠉⠀⠀⠈⠉⠀⠀⠀⠈⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠁⠀⠀⠉⠁⠀⠈⠉⠀⠀⠉⠁"
+when 6
+  puts "  ⢀⣴⣿⠿⣿⣦⡀
+  ⣿⣟⣡⣶⣌⡻⣿⠀⣀⣀⡀⢀⣀⣀⢀⣀⣀⡀⣀⠀⣀⢀⣀⣀⠀⣀⣀⡀⣀⣀⣀⠀⣀⣀⡀⢀⣀⣀⢀⣀⣀⡀
+  ⠙⣿⣿⣿⣿⣿⠈⠀⣿⡙⠇⢸⡏⠉⢸⡏⢻⡇⣿⢸⣿⢸⡟⠉⢸⡟⢹⡇⣿⡏⠿⢸⡟⢹⡇⢸⡏⠉⣾⡏⣿⡇
+  ⠀⣿⣿⣿⣿⣿⠀⠀⠙⢷⡄⢸⡿⠿⢸⣷⣾⡇⣿⣼⡇⢸⡿⠿⢸⣷⣾⡇⠘⢿⣦⢸⣧⣸⡇⢸⡿⠗⣿⡇
+  ⣦⡻⣿⣿⣿⢿⣷⠀⣿⣼⡇⢸⣧⣤⢸⡏⣿⡀⢸⣿⡇⢸⣧⣤⢸⡏⢻⡆⣾⣦⣿⢸⡟⠉⠁⢸⣧⣄⣿⣧⣾⠆
+  ⠻⣿⣦⣉⣵⣿⠟⠀
+  ⠀⠈⠛⠛⠛⠁"
 end
 puts "\nVansible with Kubespray\n- github.com/rayshoo/vansible_with_kubespray"
