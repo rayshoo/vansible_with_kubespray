@@ -11,6 +11,7 @@
       blockinfile:
         dest: /etc/hosts
         content: "{{ nodes }}"
+        insertbefore: BOF
 
     - name: Install sshpass for Authentication (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
