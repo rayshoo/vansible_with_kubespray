@@ -34,7 +34,7 @@
 
     - name: Git clone Kubespray
       git:
-        repo: https://github.com/rayshoo/kubespray.git
+        repo: https://github.com/kubernetes-sigs/kubespray.git
         dest: "{{ playbook_dir }}/kubespray"
 
     - name: copy ansible.cfg file in Kubernetes folder

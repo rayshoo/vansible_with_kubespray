@@ -1,8 +1,6 @@
 ---
 - name: Setup for the Docker's Environment
   hosts: localhost
-  vars:
-    docker_version: 20.10.2
   tasks:
     - name: Install packages to install docker
       when: ansible_os_family == "Debian"
