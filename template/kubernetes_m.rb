@@ -1,10 +1,3 @@
-describe package('pip'), :if => os[:family] == 'redhat' do
-  it { should be_installed }
-end
-describe package('python3-pip'), :if => os[:family] == 'ubuntu' do
-  it { should be_installed }
-end
-
 describe package('kubelet') do
   it { should be_installed }
 end

@@ -1,10 +1,3 @@
-require 'spec_helper'
-
-describe command('whoami') do
-  let(:disable_sudo) { true }
-  its(:stdout) { should match 'vagrant' }
-end
-
 describe package('docker-ce') do
   it { should be_installed }
 end
