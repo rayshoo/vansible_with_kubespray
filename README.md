@@ -110,6 +110,8 @@ it appears to have been deleted normally, but it is not actually deleted once at
 
 ### [Kubernetes](https://kubernetes.io/ko/docs/home/)
 
+### [Serverspec](https://serverspec.org/)
+
 <hr/>
  
 ## 참고한 책, Book referenced
@@ -154,7 +156,12 @@ it appears to have been deleted normally, but it is not actually deleted once at
 
 [브랜든의 블로그](https://brenden.tistory.com/109)<br/>
 [alice_k106님의 블로그](https://m.blog.naver.com/PostView.nhn?blogId=alice_k106&logNo=221315933945&proxyReferer=&proxyReferer=https:%2F%2Fwww.google.com%2F)<br/>
-[teamsmiley 블로그](https://teamsmiley.github.io/2020/09/30/kubespray-01-vagrant/)<br/>
+[teamsmiley 블로그](https://teamsmiley.github.io/2020/09/30/kubespray-01-vagrant/)
+
+### serverspec<br/>
+
+[Tunelinux home](https://sysadmin.atlassian.net/wiki/spaces/sysadmin/pages/686915625/serverspec)<br/>
+[Daegwon Nacyot Kim,44BITS](https://www.44bits.io/ko/post/automating-docker-image-test-using-server-spec)
 
 ### lecture<br/>
 
