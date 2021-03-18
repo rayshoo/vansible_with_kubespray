@@ -27,15 +27,31 @@
         name: ruby
         state: present
 
-    - name: Install ruby, ruby-bundler (Debian/Ubuntu)
+    - name: Install ruby, ruby-bundler, ruby-full (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
       become: yes
       apt:
         name:
           - ruby
           - ruby-bundler
+          - ri
+          - libgmp-dev
+          - ruby-dev
+          - ruby2.7-dev
+          - ruby2.7-doc
+          - ruby-full
         state: present
-        update_cache: yes
+
+    - name: Dependencies version Problem solve (Debian/Ubuntu)
+      when: ansible_os_family == "Debian"
+      lineinfile:
+        dest: "../Gemfile"
+        line: "{{ item }}"
+        insertafter: EOF
+      with_items:
+        - "gem 'net-ssh', '>= 6.0.2'"
+        - "gem 'ed25519', '>= 1.2', '< 2.0'"
+        - "gem 'bcrypt_pbkdf', '>= 1.0', '< 2.0'"
 
     - name: Install gems using a Gemfile
       bundler:
