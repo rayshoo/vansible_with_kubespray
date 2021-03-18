@@ -31,8 +31,9 @@ Vagrant.configure("2") do |config|
   host_file_text = "nodes: \""
   ansible_host_file_text = ""
   inventory_text = "[all]"
-  master_text = ""
-  worker_text = ""
+  master_hosts = ""
+  worker_hosts = ""
+  etcd_hosts = ""
   ssh_auth_text = "#!/bin/bash\nif [ ! -f \"/home/vagrant/.ssh/id_rsa\" ]; then\n  yes \"/home/vagrant/.ssh/id_rsa\" | ssh-keygen -t rsa -N \"\"\nelse\n  echo \"id_rsa file already exists. Skip ssh-keygen...\"\nfi\n"
   path = "templates"
   spec_prefix_text = read_file("#{path}/default.rb")
@@ -136,11 +137,16 @@ Vagrant.configure("2") do |config|
         if machine < (master + worker)
           if cluster_structure
             if name == worker_node_name
-              worker_text += "\n#{name}#{id}"
+              worker_hosts += "\n#{name}#{id}"
               inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr}"
             else
-              master_text += "\n#{name}#{id}"
-              inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr} etcd_member_name=etcd#{id}"
+              master_hosts += "\n#{name}#{id}"
+              if (machine == worker + 1 && master % 2 == 0)
+                inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr}"
+              else
+                inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr} etcd_member_name=etcd#{id}"
+                etcd_hosts += "\n#{name}#{id}"
+              end
             end
           end
         else
@@ -149,9 +155,10 @@ Vagrant.configure("2") do |config|
           n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
           n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook environment/kubernetes/kubespray_env.yaml", privileged: false
           if cluster_structure
-            master_text += "\n#{name}#{id}"
+            master_hosts += "\n#{name}#{id}"
+            etcd_hosts += "\n#{name}#{id}"
             inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr} etcd_member_name=etcd#{id}"
-            inventory_text += "\n\n[kube-master]#{master_text}\n\n[etcd]#{master_text}\n\n[kube-node]#{worker_text}\n\n[calico-rr]\n\n[k8s-cluster:children]\nkube-master\nkube-node\ncalico-rr"
+            inventory_text += "\n\n[kube-master]#{master_hosts}\n\n[etcd]#{etcd_hosts}\n\n[kube-node]#{worker_hosts}\n\n[calico-rr]\n\n[k8s-cluster:children]\nkube-master\nkube-node\ncalico-rr"
             write_file(inventory_text, "environment/kubernetes/inventory.ini")
           else
             n.vm.provision "file", source: "cluster/inventory.ini", destination: "environment/kubernetes/inventory.ini"

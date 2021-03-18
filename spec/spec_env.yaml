@@ -27,12 +27,15 @@
         name: ruby
         state: present
 
-    - name: Install ruby (Debian/Ubuntu)
+    - name: Install ruby, ruby-bundler (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
       become: yes
       apt:
-        name: ruby
+        name:
+          - ruby
+          - ruby-bundler
         state: present
+        update_cache: yes
 
     - name: Install gems using a Gemfile
       bundler:
