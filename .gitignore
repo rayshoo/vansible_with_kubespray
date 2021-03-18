@@ -1,4 +1,5 @@
 .vagrant
+.env
 
 environment/ansible/hosts.ini
 environment/ansible/host_vars/localhost.yaml
