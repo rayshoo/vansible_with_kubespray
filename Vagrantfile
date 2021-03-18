@@ -169,16 +169,17 @@ Vagrant.configure("2") do |config|
       end
       if spec_provision
         if machine == (master + worker)
-          n.vm.provision "file", source: "spec", destination: "~/environment/spec"
-          n.vm.provision "file", source: "Rakefile", destination: "~/environment/"
-          n.vm.provision "file", source: ".rspec", destination: "~/environment/"
-          n.vm.provision "file", source: "templates/spec_helper.rb", destination: "~/environment/spec/spec_helper.rb"
-          n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook environment/spec/spec_env.yaml", privileged: false
+          n.vm.provision "file", source: "spec", destination: "~/environment/serverspec/spec"
+          n.vm.provision "file", source: "Gemfile", destination: "~/environment/serverspec/"
+          n.vm.provision "file", source: "Rakefile", destination: "~/environment/serverspec/"
+          n.vm.provision "file", source: ".rspec", destination: "~/environment/serverspec/"
+          n.vm.provision "file", source: "templates/spec_helper.rb", destination: "~/environment/serverspec/spec/spec_helper.rb"
+          n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook environment/serverspec/spec/spec_env.yaml", privileged: false
         end
       end
       if spec_test
         if machine == (master + worker)
-          n.vm.provision "shell", keep_color: true, inline: "cd environment/ && rake spec", privileged: false
+          n.vm.provision "shell", keep_color: true, inline: "cd environment/serverspec/ && rake spec", privileged: false
         end
       end
       private_count += 1

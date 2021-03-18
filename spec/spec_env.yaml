@@ -27,23 +27,14 @@
         name: ruby
         state: present
 
-    - name: Install rake (RHEL/CentOS)
-      when: ansible_os_family == 'RedHat'
-      gem:
-        name: rake
-        state: latest
-        user_install: yes
-
-    - name: Install serverspec (RHEL/CentOS)
-      when: ansible_os_family == 'RedHat'
-      gem:
-        name: serverspec
-        state: latest
-        user_install: yes
-
-    - name: Install ruby-serverspec (Debian/Ubuntu)
+    - name: Install ruby (Debian/Ubuntu)
       when: ansible_os_family == "Debian"
       become: yes
       apt:
-        name: ruby-serverspec
+        name: ruby
         state: present
+
+    - name: Install gems using a Gemfile
+      bundler:
+        state: present
+        gemfile: ../Gemfile
