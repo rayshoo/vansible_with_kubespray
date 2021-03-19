@@ -41,6 +41,21 @@ alias k='kubectl'
 <span>2.</span> **vagrant destroy --force && vagrant up** 와 같이 가상머신을 삭제하고 다시 생성할때,<br/>
 간혹 정상적으로 삭제된 것으로 보이지만 실제로는 삭제되지 않아서 실패하는 경우가 있으므로 버추얼 머신 환경설정의 가상머신 파일 저장 경로에서 이를 직접 확인해서 삭제 후 다시 시도한다.
 
+<span>3.</span> kubernetes 프로비전이 계속 실패하는 경우, 다음의 명령어를 입력하여 다시 시도한다.
+
+```sh
+// host machine
+$ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // 기본 설정, $ vagrant ssh m1
+
+// guest machine
+$ ansible-playbook -i ~/environment/kubernetes/inventory.ini ~/environment/kubernetes/kubespray/reset.yml -v
+$ yes
+$ exit
+
+// host machine
+$ vagrant provision $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // 기본 설정, $ vagrant provision m1
+```
+
 <hr/>
 
 ## Introduce
@@ -83,6 +98,21 @@ alias k='kubectl'
 
 <span>2.</span> When deleting and recreating a virtual machine like **vagrant destroy --force && vagrant up**,<br/>
 it appears to have been deleted normally, but it is not actually deleted once at a time. Check it yourself, delete it, and try again.
+
+<span>3.</span> If kubernetes provisioning continues to fail, try again by entering the following command.
+
+```sh
+// host machine
+$ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // By default, $ vagrant ssh m1
+
+// guest machine
+$ ansible-playbook -i ~/environment/kubernetes/inventory.ini ~/environment/kubernetes/kubespray/reset.yml -v
+$ yes
+$ exit
+
+// host machine
+$ vagrant provision $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // By default, $ vagrant provision m1
+```
 
 <hr/>
 
