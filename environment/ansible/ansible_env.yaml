@@ -67,6 +67,7 @@
       git:
         repo: "https://github.com/junegunn/vim-plug.git"
         dest: "{{ local_home }}/environment/ansible/custom/vim-plug"
+        version: cffcfe150bda75177920530c5f1911b52f70a065
 
     - name: "Copy plug.vim file in {{ local_home }}/.vim/autoload"
       copy:
@@ -113,6 +114,7 @@
       git:
         repo: "https://github.com/tpope/vim-pathogen.git"
         dest: "{{ local_home }}/environment/ansible/custom/vim-pathogen"
+        version: e0a3efbda5ea8e5b181b2b232ef6453c05d07732
 
     - name: "Copy pathogen.vim file in {{ local_home }}/.vim/autoload"
       copy:

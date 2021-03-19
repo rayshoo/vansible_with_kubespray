@@ -36,6 +36,7 @@
       git:
         repo: https://github.com/kubernetes-sigs/kubespray.git
         dest: "{{ playbook_dir }}/kubespray"
+        version: a39f3061842cb5fe9fdd1bec3dad679457b404ca
 
     - name: copy ansible.cfg file in Kubernetes folder
       copy:
