@@ -151,20 +151,19 @@ Vagrant.configure("2") do |config|
           end
         else
           n.vm.provision "file", source: "environment/kubernetes", destination: "~/environment/kubernetes"
-          n.vm.provision "file", source: "environment/ansible/ansible.cfg", destination: "~/environment/kubernetes/"
-          n.vm.provision "file", source: "environment/ansible/hosts.ini", destination: "~/environment/kubernetes/"
-          n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook environment/kubernetes/kubespray_env.yaml", privileged: false
           if cluster_structure
             master_hosts += "\n#{name}#{id}"
             etcd_hosts += "\n#{name}#{id}"
             inventory_text += "\n#{name}#{id} ansible_host=#{ip_addr}  ip=#{ip_addr} etcd_member_name=etcd#{id}"
             inventory_text += "\n\n[kube-master]#{master_hosts}\n\n[etcd]#{etcd_hosts}\n\n[kube-node]#{worker_hosts}\n\n[calico-rr]\n\n[k8s-cluster:children]\nkube-master\nkube-node\ncalico-rr"
             write_file(inventory_text, "environment/kubernetes/inventory.ini")
+            n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook environment/kubernetes/kubespray_env.yaml", privileged: false
           else
             n.vm.provision "file", source: "cluster/inventory.ini", destination: "environment/kubernetes/inventory.ini"
-            n.vm.provision "file", source: "cluster/group_vars", destination: "environment/kubernetes/kubespray/group_vars"
+            n.vm.provision "file", source: "cluster/group_vars", destination: "environment/kubernetes/group_vars"
+            n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook -e cluster_structure=false environment/kubernetes/kubespray_env.yaml", privileged: false
           end
-          n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubespray/cluster.yml -v --become --become-user=root", privileged: false
+          n.vm.provision "shell", keep_color: true, inline: "cd environment/kubernetes/ && ANSIBLE_FORCE_COLOR=true ansible-playbook -i inventory.ini kubespray/cluster.yml -v --become --become-user=root", privileged: false
           n.vm.provision "shell", keep_color: true, inline: "ANSIBLE_FORCE_COLOR=true ansible-playbook -i environment/kubernetes/inventory.ini environment/kubernetes/kubernetes_env.yaml", privileged: false
         end
       end
