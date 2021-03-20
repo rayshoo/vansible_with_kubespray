@@ -186,7 +186,7 @@ Vagrant.configure("2") do |config|
       end
       if spec_test
         if machine == (master + worker)
-          n.vm.provision "shell", keep_color: true, inline: "cd environment/serverspec/ && rake spec", privileged: false
+          n.vm.provision "shell", inline: "cd environment/serverspec/ && rake spec", privileged: false
         end
       end
       private_count += 1
