@@ -4,6 +4,7 @@
   gather_facts: yes
   vars: 
     local_user: "{{ lookup('env','USER') }}"
+    cluster_structure: true
   tasks:
     - name: Install epel-release (RHEL/CentOS)
       when: ansible_os_family == "RedHat"
@@ -42,6 +43,15 @@
       copy:
         src: kubespray/ansible.cfg
         dest: "{{ playbook_dir }}/ansible.cfg"
+        owner: "{{ local_user }}"
+        group: "{{ local_user }}"
+        mode: 0664
+
+    - name: Copy group_vars folder
+      when: cluster_structure == true
+      copy:
+        src: kubespray/inventory/sample/group_vars
+        dest: "{{ playbook_dir }}"
         owner: "{{ local_user }}"
         group: "{{ local_user }}"
         mode: 0664

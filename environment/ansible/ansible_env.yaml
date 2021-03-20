@@ -126,7 +126,7 @@
 
     - name: Unarchive vim-ansible-yaml.tar
       unarchive:
-        src: "{{ local_home }}/environment/ansible/custom/vim-ansible-yaml.tar"
+        src: "{{ local_home }}/environment/ansible/custom/vim-ansible-yaml-1.0.tar.gz"
         dest: "{{ local_home }}/.vim/bundle/"
         owner: "{{ local_user }}"
         group: "{{ local_user }}"
