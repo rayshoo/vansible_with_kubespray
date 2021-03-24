@@ -48,7 +48,7 @@ alias k='kubectl'
 $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // 기본 설정, $ vagrant ssh m1
 
 // guest machine
-$ ansible-playbook -i ~/environment/kubernetes/inventory.ini ~/environment/kubernetes/kubespray/reset.yml -v
+$ cd environment/kubernetes && ansible-playbook -i inventory.ini kubespray/reset.yml -v --become --become-user=root
 $ yes
 $ exit
 
@@ -106,7 +106,7 @@ it appears to have been deleted normally, but it is not actually deleted once at
 $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // By default, $ vagrant ssh m1
 
 // guest machine
-$ ansible-playbook -i ~/environment/kubernetes/inventory.ini ~/environment/kubernetes/kubespray/reset.yml -v
+$ cd environment/kubernetes && ansible-playbook -i inventory.ini kubespray/reset.yml -v --become --become-user=root
 $ yes
 $ exit
 
@@ -124,9 +124,9 @@ $ vagrant provision $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}'
 
 <hr/>
 
-## 개인 문서, Private Documents
+## 개인 블로그, Personal Blog
 
-### [https://github.com/rayshoo/vansible_with_kubespray/wiki](https://github.com/rayshoo/vansible_with_kubespray/wiki)
+### [dragonz.dev](https://dragonz.dev)
 
 <hr/>
 
