@@ -19,7 +19,7 @@ Vagrant, Ansible, Kubespray를 사용한 IaC(Infra as Code) 도구
 <span>3.</span> [Vagrantfile](Vagrantfile)이 위치한 경로에서 하단의 명령어를 bash 쉘에 입력한다.
 
 ```sh
-$ vagrant plugin install vagrant-env vagrant-vbguest
+$ vagrant plugin install vagrant-env
 $ vagrant up --color
 $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // 기본 설정 $ vagrant ssh m1
 ```
@@ -77,7 +77,7 @@ then configure the [cluster folder](cluster).
 <span>3.</span> Type the following command into the bash shell in the path where the [Vagrantfile](Vagrantfile) is located.
 
 ```sh
-$ vagrant plugin install vagrant-env vagrant-vbguest
+$ vagrant plugin install vagrant-env
 $ vagrant up --color
 $ vagrant ssh $(vagrant status | tail -5 | sed -n '1p' | awk '{ print $1}') // By default, $ vagrant ssh m1
 ```
