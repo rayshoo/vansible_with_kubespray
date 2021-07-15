@@ -1,6 +1,9 @@
 # Vansible with Kubespray
-**이 프로젝트는 더이상 관리 되지 않기에 추천되지 않습니다. 대신 [Vansible with Kubeadm](https://github.com/rayshoo/vansible_with_kubeadm.git) 프로젝트를 사용하시기 바랍니다.(21.06.23)**<br/>
-**This project is not recommended as it is no longer maintained. Use the [Vansible with Kubeadm](https://github.com/rayshoo/vansible_with_kubeadm.git) project instead.(21.06.23)**
+**이 프로젝트는 더이상 관리 되지 않기에 추천되지 않습니다. 대신 [Vansinetes](https://github.com/rayshoo/vansinetes.git) 프로젝트를 사용하시기 바랍니다.(21.06.23)**<br/>
+**This project is not recommended as it is no longer maintained. Use the [Vansinetes](https://github.com/rayshoo/vansinetes.git) project instead.(21.06.23)**
+
+<hr/>
+
 ## 소개
 
 쉽고 빠른 Docker+Kubernetes 개발, 학습 및 강의 환경 구축을 위해 설계된<br/>
